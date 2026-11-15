@@ -13,21 +13,24 @@ const TAU = Math.PI * 2;
 
 // ---------- Koi ----------
 
-/** Body, patch and fin colors for each koi variety */
+/**
+ * Each variety: body color, patch color (or none), fin color, and the color
+ * of the thin outline that keeps pale koi visible on a light page.
+ */
 const KOI_LOOKS = [
-  { body: "#f4f1ea", patch: "#e2572c", fin: "#f4f1ea" }, // white with red
-  { body: "#e9783c", patch: null, fin: "#f0975f" }, // orange
-  { body: "#e5ad3f", patch: null, fin: "#edc468" }, // gold
-  { body: "#f4f1ea", patch: "#e9783c", fin: "#f4f1ea" }, // white with orange
-  { body: "#e2572c", patch: "#f4f1ea", fin: "#ea7f5c" }, // red with white
+  { body: "#f5f2ea", patch: "#e0552b", fin: "#efe6d6", edge: "#9c8f7c" }, // kohaku: white with red
+  { body: "#ec8040", patch: null, fin: "#f2a46e", edge: "#b45a26" }, // orange
+  { body: "#e8b54a", patch: null, fin: "#f0cd7a", edge: "#a87d22" }, // gold
+  { body: "#f5f2ea", patch: "#ec8040", fin: "#efe6d6", edge: "#9c8f7c" }, // white with orange
+  { body: "#e0552b", patch: "#f5f2ea", fin: "#ec8a62", edge: "#a63a19" }, // red with white
 ] as const;
 
 /** How see-through the koi are, so text above them stays readable */
-const KOI_OPACITY = 0.55;
+const KOI_OPACITY = 0.62;
 
 /** Points along the spine, nose to tail, and the body's half-width at each */
 const SPINE = 9;
-const PROFILE = [0.46, 0.8, 0.98, 1, 0.9, 0.74, 0.56, 0.38, 0.22];
+const PROFILE = [0.55, 0.86, 1, 0.98, 0.88, 0.72, 0.54, 0.38, 0.26];
 const spineX = new Array<number>(SPINE).fill(0);
 const spineY = new Array<number>(SPINE).fill(0);
 
@@ -44,9 +47,30 @@ function smoothOutline(path: Path2D, points: number[][]): void {
   path.closePath();
 }
 
+/** A repeatable "random" number from 0 to 1, so each koi keeps its own pattern */
+function seeded(seed: number, n: number): number {
+  const x = Math.sin(seed * 9301 + n * 49297) * 233280;
+  return x - Math.floor(x);
+}
+
+/** A soft fan-shaped fin pointing out from (x, y) at `angle` */
+function fin(path: Path2D, x: number, y: number, angle: number, reach: number, width: number): void {
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const tipX = x + cos * reach;
+  const tipY = y + sin * reach;
+  // Points either side of the tip, so the fin flares out like a fan
+  const sideX = -sin * width;
+  const sideY = cos * width;
+  path.moveTo(x, y);
+  path.quadraticCurveTo(tipX + sideX * 1.1, tipY + sideY * 1.1, tipX - cos * reach * 0.1, tipY - sin * reach * 0.1);
+  path.quadraticCurveTo(tipX - sideX * 0.5, tipY - sideY * 0.5, x - cos * reach * 0.15, y - sin * reach * 0.15);
+  path.closePath();
+}
+
 export function drawKoi(ctx: CanvasRenderingContext2D, koi: Creature, fade: number): void {
   const length = koi.length;
-  const half = length * 0.15;
+  const half = length * 0.14;
   const look = KOI_LOOKS[Math.floor(koi.look * KOI_LOOKS.length) % KOI_LOOKS.length];
   const opacity = KOI_OPACITY * fade;
 
@@ -54,93 +78,110 @@ export function drawKoi(ctx: CanvasRenderingContext2D, koi: Creature, fade: numb
   // the canvas is rotated below to point the koi where it is heading.
   for (let i = 0; i < SPINE; i++) {
     const t = i / (SPINE - 1);
-    spineX[i] = length * (0.5 - t);
-    spineY[i] = Math.sin(koi.swim - t * 3) * length * 0.075 * t * t;
+    spineX[i] = length * (0.42 - t * 0.78);
+    spineY[i] = Math.sin(koi.swim - t * 3) * length * 0.07 * t * t;
   }
 
-  const outline: number[][] = [[spineX[0] + half * 0.7, spineY[0]]];
+  const outline: number[][] = [[spineX[0] + half * 0.75, spineY[0]]];
   for (let i = 0; i < SPINE; i++) outline.push([spineX[i], spineY[i] - half * PROFILE[i]]);
-  outline.push([spineX[SPINE - 1] - half * 0.25, spineY[SPINE - 1]]);
+  outline.push([spineX[SPINE - 1] - half * 0.2, spineY[SPINE - 1]]);
   for (let i = SPINE - 1; i >= 0; i--) outline.push([spineX[i], spineY[i] + half * PROFILE[i]]);
   const body = new Path2D();
   smoothOutline(body, outline);
+
+  // Fins: two pectoral fins behind the head, two small pelvic fins midway,
+  // and a long flowing tail, all moving with the swim
+  const fins = new Path2D();
+  const flap = Math.sin(koi.swim * 0.6) * 0.22;
+  const pecX = spineX[2];
+  const pecY = spineY[2];
+  const pecOut = half * 0.85;
+  fin(fins, pecX, pecY - pecOut, -2.2 - flap, length * 0.2, length * 0.07);
+  fin(fins, pecX, pecY + pecOut, 2.2 + flap, length * 0.2, length * 0.07);
+  const pelX = spineX[5];
+  const pelY = spineY[5];
+  const pelOut = half * PROFILE[5] * 0.8;
+  fin(fins, pelX, pelY - pelOut, -2.5 + flap * 0.5, length * 0.11, length * 0.035);
+  fin(fins, pelX, pelY + pelOut, 2.5 - flap * 0.5, length * 0.11, length * 0.035);
+
+  const baseX = spineX[SPINE - 1];
+  const baseY = spineY[SPINE - 1];
+  const swing = Math.sin(koi.swim - 3.4) * length * 0.09;
+  const tailLength = length * 0.3;
+  fins.moveTo(baseX + length * 0.03, baseY - half * 0.22);
+  fins.bezierCurveTo(
+    baseX - tailLength * 0.3, baseY - half * 0.5 + swing * 0.3,
+    baseX - tailLength * 0.8, baseY - length * 0.15 + swing,
+    baseX - tailLength, baseY - length * 0.13 + swing * 1.1,
+  );
+  fins.quadraticCurveTo(baseX - tailLength * 0.55, baseY + swing * 0.8, baseX - tailLength, baseY + length * 0.13 + swing * 1.1);
+  fins.bezierCurveTo(
+    baseX - tailLength * 0.8, baseY + length * 0.15 + swing,
+    baseX - tailLength * 0.3, baseY + half * 0.5 + swing * 0.3,
+    baseX + length * 0.03, baseY + half * 0.22,
+  );
+  fins.closePath();
 
   // Soft shadow on the pond floor, offset down and to the right
   ctx.save();
   ctx.translate(koi.x + length * 0.05, koi.y + length * 0.09);
   ctx.rotate(koi.angle);
-  ctx.globalAlpha = 0.09 * fade;
+  ctx.globalAlpha = 0.08 * fade;
   ctx.fillStyle = "#12302d";
   ctx.fill(body);
+  ctx.fill(fins);
   ctx.restore();
 
   ctx.save();
   ctx.translate(koi.x, koi.y);
   ctx.rotate(koi.angle);
 
-  // Side fins, a little behind the head, flapping gently
-  const flap = Math.sin(koi.swim * 0.5) * 0.18;
-  const finX = spineX[2] - length * 0.04;
-  const finOut = half * PROFILE[2] + length * 0.03;
-  ctx.globalAlpha = opacity * 0.6;
+  // Fins first, so the body sits on top. See-through, with a fine edge.
+  ctx.globalAlpha = opacity * 0.7;
   ctx.fillStyle = look.fin;
-  ctx.beginPath();
-  ctx.ellipse(finX, spineY[2] - finOut, length * 0.1, length * 0.04, 0.7 + flap, 0, TAU);
-  ctx.ellipse(finX, spineY[2] + finOut, length * 0.1, length * 0.04, -0.7 - flap, 0, TAU);
-  ctx.fill();
-
-  // Tail fin, swinging a beat behind the body
-  const baseX = spineX[SPINE - 1];
-  const baseY = spineY[SPINE - 1];
-  const swing = Math.sin(koi.swim - 3.6) * length * 0.07;
-  ctx.beginPath();
-  ctx.moveTo(baseX + length * 0.04, baseY - half * 0.2);
-  ctx.quadraticCurveTo(
-    baseX - length * 0.08,
-    baseY - length * 0.03 + swing * 0.3,
-    baseX - length * 0.24,
-    baseY + swing - length * 0.11,
-  );
-  ctx.quadraticCurveTo(
-    baseX - length * 0.16,
-    baseY + swing * 0.8 - length * 0.03,
-    baseX - length * 0.13,
-    baseY + swing * 0.7,
-  );
-  ctx.quadraticCurveTo(
-    baseX - length * 0.16,
-    baseY + swing * 0.8 + length * 0.03,
-    baseX - length * 0.24,
-    baseY + swing + length * 0.11,
-  );
-  ctx.quadraticCurveTo(
-    baseX - length * 0.08,
-    baseY + length * 0.03 + swing * 0.3,
-    baseX + length * 0.04,
-    baseY + half * 0.2,
-  );
-  ctx.closePath();
-  ctx.fill();
+  ctx.fill(fins);
+  ctx.globalAlpha = opacity * 0.45;
+  ctx.strokeStyle = look.edge;
+  ctx.lineWidth = 0.6;
+  ctx.stroke(fins);
 
   // Body
   ctx.globalAlpha = opacity;
   ctx.fillStyle = look.body;
   ctx.fill(body);
 
-  // Colored patches along the back, for the varieties that have them
+  // Patches: a few overlapping blobs, trimmed to the body so they wrap its
+  // edges like real koi markings. Each koi has its own layout.
   if (look.patch) {
+    ctx.save();
+    ctx.clip(body);
     ctx.fillStyle = look.patch;
     ctx.beginPath();
-    const first = koi.look < 0.5 ? 1 : 2;
-    for (const i of [first, first + 3]) {
-      ctx.ellipse(spineX[i], spineY[i], length * 0.085, half * PROFILE[i] * 0.74, 0, 0, TAU);
+    const seed = koi.look * 1000;
+    const blobs = 3 + Math.floor(seeded(seed, 0) * 2);
+    for (let n = 0; n < blobs; n++) {
+      const i = 1 + Math.floor(seeded(seed, n + 1) * 6);
+      const side = (seeded(seed, n + 11) - 0.5) * half * 1.4;
+      const rx = length * (0.07 + seeded(seed, n + 21) * 0.07);
+      const ry = half * (0.55 + seeded(seed, n + 31) * 0.5);
+      ctx.ellipse(spineX[i], spineY[i] + side, rx, ry, seeded(seed, n + 41) - 0.5, 0, TAU);
     }
     ctx.fill();
+    ctx.restore();
   }
 
-  // A faint edge, so the white koi show up against a light page
-  ctx.globalAlpha = opacity * 0.4;
-  ctx.strokeStyle = "#2c4744";
+  // Eyes, near the front of the head
+  ctx.globalAlpha = opacity * 0.8;
+  ctx.fillStyle = "#2a2622";
+  ctx.beginPath();
+  const eyeX = spineX[0] + half * 0.15;
+  ctx.arc(eyeX, spineY[0] - half * 0.42, length * 0.014, 0, TAU);
+  ctx.arc(eyeX, spineY[0] + half * 0.42, length * 0.014, 0, TAU);
+  ctx.fill();
+
+  // A fine outline, so the pale koi show up against a light page
+  ctx.globalAlpha = opacity * 0.5;
+  ctx.strokeStyle = look.edge;
   ctx.lineWidth = 0.6;
   ctx.stroke(body);
 

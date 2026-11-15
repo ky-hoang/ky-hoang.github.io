@@ -171,12 +171,13 @@ export function startPond(canvas: HTMLCanvasElement): void {
 
   // ---------- Feeding ----------
 
-  function feed(x: number, y: number, target: EventTarget | null, fromMouse: boolean): void {
+  const CONTROLS = "a, button, input, textarea, select, label, summary";
+  const isControl = (target: EventTarget | null) => target instanceof Element && target.closest(CONTROLS) !== null;
+
+  function feed(x: number, y: number, target: EventTarget | null): void {
     if (lessMotion.matches || fade < 1) return;
     // Leave links and buttons alone
-    if (target instanceof Element && target.closest("a, button, input, textarea, select, label, summary")) return;
-    // A double-click on a word selects it; that is not a request to feed
-    if (fromMouse && window.getSelection()?.toString().trim()) return;
+    if (isControl(target)) return;
 
     const now = performance.now();
     if (now - lastFedAt < 400) return;
@@ -187,8 +188,14 @@ export function startPond(canvas: HTMLCanvasElement): void {
     ripples.push({ x, y, born: now });
   }
 
+  // A double-click normally highlights the word under the cursor. Stop that,
+  // so feeding never selects text. Dragging to select still works as usual.
+  window.addEventListener("mousedown", (event) => {
+    if (event.detail > 1 && !lessMotion.matches && !isControl(event.target)) event.preventDefault();
+  });
+
   window.addEventListener("dblclick", (event) => {
-    feed(event.clientX, event.clientY, event.target, true);
+    feed(event.clientX, event.clientY, event.target);
   });
 
   // Phones do not send a reliable double-click, so watch for two quick taps
@@ -198,7 +205,7 @@ export function startPond(canvas: HTMLCanvasElement): void {
     const now = performance.now();
     const near = Math.hypot(event.clientX - lastTap.x, event.clientY - lastTap.y) < 32;
     if (now - lastTap.at < 320 && near) {
-      feed(event.clientX, event.clientY, event.target, false);
+      feed(event.clientX, event.clientY, event.target);
       lastTap.at = 0;
     } else {
       lastTap = { at: now, x: event.clientX, y: event.clientY };

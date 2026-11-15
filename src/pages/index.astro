@@ -16,9 +16,18 @@ const projects = await getProjects();
 
 <style>
   .intro {
-    max-width: 34rem;
+    max-width: 36rem;
     margin-bottom: 4rem;
-    font-size: var(--text-lg);
-    line-height: 1.55;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 34rem) {
+    .intro {
+      font-size: 1.3rem;
+    }
   }
 </style>
