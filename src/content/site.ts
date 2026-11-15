@@ -25,7 +25,7 @@ export const site = {
 
   // Shown in the footer and on the About page, in this order
   links: [
-    { label: "GitHub", url: "https://github.com/DeathSubtracter" },
+    { label: "GitHub", url: "https://github.com/ky-hoang" },
     { label: "LinkedIn", url: "https://www.linkedin.com/in/ky-m-hoang/" },
   ],
 };

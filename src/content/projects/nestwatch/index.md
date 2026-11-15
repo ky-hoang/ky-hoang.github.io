@@ -6,7 +6,7 @@ summary: Maternal health monitoring that combines wearable data with pregnancy a
 stack: [Python, FastAPI, scikit-learn, pytest, React, TypeScript]
 cover: ./home.png
 links:
-  code: https://github.com/DeathSubtracter/nestwatch
+  code: https://github.com/ky-hoang/nestwatch
   demo: https://nestwatchproviderportal.lovable.app/
 ---
 

@@ -5,7 +5,7 @@ type: hackathon
 summary: Describe what to watch for in a plain sentence, and it watches through your camera and microphone and alerts you when it happens.
 stack: [Python, JavaScript, HTML/CSS, Meta Model API]
 links:
-  code: https://github.com/DeathSubtracter/vivre
+  code: https://github.com/ky-hoang/vivre
   demo: https://web-production-749fb.up.railway.app
 ---
 
