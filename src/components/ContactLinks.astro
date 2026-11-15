@@ -1,0 +1,31 @@
+---
+/*
+  Your links, read from src/content/site.ts. Used in the footer and on the
+  About page, so editing site.ts updates both.
+*/
+import { site } from "../content/site";
+
+const links = [
+  ...site.links,
+  ...(site.email ? [{ label: "Email", url: `mailto:${site.email}` }] : []),
+  ...(site.resume ? [{ label: "Résumé", url: site.resume }] : []),
+];
+---
+
+<ul class="links" role="list">
+  {
+    links.map((link) => (
+      <li>
+        <a href={link.url}>{link.label}</a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+</style>

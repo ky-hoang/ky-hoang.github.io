@@ -1,0 +1,16 @@
+---
+/* Shown when someone visits an address that does not exist. */
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Page not found">
+  <h1 class="page-title">Nothing in this part of the pond.</h1>
+  <p class="back"><a href="/">Back to projects</a></p>
+</Base>
+
+<style>
+  .back {
+    margin-top: 1rem;
+    color: var(--muted);
+  }
+</style>

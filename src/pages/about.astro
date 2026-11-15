@@ -1,0 +1,31 @@
+---
+/* About page. The text comes from src/content/about.md, the links from site.ts. */
+import Base from "../layouts/Base.astro";
+import ContactLinks from "../components/ContactLinks.astro";
+import { Content } from "../content/about.md";
+---
+
+<Base title="About">
+  <h1 class="page-title">About</h1>
+
+  <div class="prose">
+    <Content />
+  </div>
+
+  <section class="contact" aria-labelledby="contact-heading">
+    <h2 id="contact-heading" class="label">Contact</h2>
+    <ContactLinks />
+  </section>
+</Base>
+
+<style>
+  .page-title {
+    margin-bottom: 1.5rem;
+  }
+
+  .contact {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 3rem;
+  }
+</style>

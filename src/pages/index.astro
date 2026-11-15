@@ -1,0 +1,24 @@
+---
+/* Home page: a short intro, then the project archive. */
+import Base from "../layouts/Base.astro";
+import ProjectList from "../components/ProjectList.astro";
+import { getProjects } from "../lib/projects";
+import { site } from "../content/site";
+
+const projects = await getProjects();
+---
+
+<Base>
+  <h1 class="sr-only">{site.name}</h1>
+  <p class="intro">{site.intro}</p>
+  <ProjectList projects={projects} />
+</Base>
+
+<style>
+  .intro {
+    max-width: 34rem;
+    margin-bottom: 4rem;
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+</style>

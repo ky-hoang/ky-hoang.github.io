@@ -1,0 +1,123 @@
+---
+/*
+  The page for a single project. Astro makes one of these for every folder
+  in src/content/projects/, using the folder name as the address.
+*/
+import { render } from "astro:content";
+import { Image } from "astro:assets";
+import Base from "../../layouts/Base.astro";
+import { getProjects, typeLabel, yearOf, type Project } from "../../lib/projects";
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const { title, summary, stack, cover, links } = project.data;
+const { Content } = await render(project);
+---
+
+<Base title={title} description={summary}>
+  <article>
+    <a class="back" href="/">← Projects</a>
+
+    <header class="head">
+      <p class="label">{yearOf(project)} · {typeLabel(project)}</p>
+      <h1 class="page-title">{title}</h1>
+      <p class="summary">{summary}</p>
+
+      {
+        stack.length > 0 && (
+          <ul class="stack" role="list" aria-label="Built with">
+            {stack.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      {
+        (links.code || links.demo) && (
+          <p class="links">
+            {links.code && <a href={links.code}>Code ↗</a>}
+            {links.demo && <a href={links.demo}>Live demo ↗</a>}
+          </p>
+        )
+      }
+    </header>
+
+    {cover && <Image class="cover" src={cover} alt="" width={1280} loading="eager" />}
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .back {
+    display: inline-block;
+    margin-bottom: 2.5rem;
+    font-size: var(--text-sm);
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .head {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .summary {
+    font-size: var(--text-lg);
+    color: var(--muted);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+
+  .stack li {
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  .links {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 0.4rem;
+    font-size: var(--text-sm);
+  }
+
+  .links a {
+    color: var(--accent);
+  }
+
+  article :global(img.cover) {
+    display: block;
+    width: 100%;
+    /* Crop tall screenshots to a banner, keeping the top */
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+    margin-bottom: 2.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+</style>

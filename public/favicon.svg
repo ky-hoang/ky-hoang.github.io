@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .water { fill: #17756c; }
+    .koi { fill: #f4f1ea; }
+    .spot { fill: #e9783c; }
+    @media (prefers-color-scheme: dark) {
+      .water { fill: #f0b955; }
+      .koi { fill: #0d1114; }
+      .spot { fill: #0d1114; }
+    }
+  </style>
+  <circle class="water" cx="16" cy="16" r="16" />
+  <g transform="rotate(-35 16 16)">
+    <path class="koi" d="M25 16c0 2.6-3.6 4.6-8 4.6-3.2 0-5.6-1.6-7.6-3.4L5 20.4V11.6l4.4 3.2c2-1.8 4.4-3.4 7.6-3.4 4.4 0 8 2 8 4.6Z" />
+    <circle class="spot" cx="18.5" cy="15.2" r="2.1" />
+  </g>
+</svg>

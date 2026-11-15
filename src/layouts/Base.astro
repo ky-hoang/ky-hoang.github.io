@@ -1,0 +1,69 @@
+---
+/*
+  The frame shared by every page: the <head>, header, footer and the
+  pond background. Each page's own content goes where <slot /> is.
+*/
+import "../styles/tokens.css";
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Pond from "../pond/Pond.astro";
+import { site } from "../content/site";
+
+interface Props {
+  /** Page name for the browser tab. Leave out on the home page. */
+  title?: string;
+  /** One sentence for search results and link previews. */
+  description?: string;
+}
+
+const { title, description = site.intro } = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : site.name;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!--
+      Sets light or dark before the page is drawn, so it never flashes the
+      wrong one. Uses the visitor's saved choice, else their system setting.
+    -->
+    <script is:inline>
+      (function () {
+        var saved = null;
+        try {
+          saved = localStorage.getItem("theme");
+        } catch (e) {}
+        var theme =
+          saved === "light" || saved === "dark"
+            ? saved
+            : matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- To remove the background: delete this line, the Pond import above, and the src/pond folder -->
+    <Pond />
+
+    <div class="page">
+      <Header />
+      <main>
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>

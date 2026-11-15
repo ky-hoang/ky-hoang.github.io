@@ -1,0 +1,35 @@
+# Publishes the site to GitHub Pages every time you push to the main branch.
+# You should not need to edit this file.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Also lets you run it by hand from the Actions tab on GitHub
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+      - name: Install, build and upload the site
+        uses: withastro/action@v6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,52 @@
+---
+/* Top bar: your name on the left, About and the light/dark toggle on the right. */
+import ThemeToggle from "./ThemeToggle.astro";
+import { site } from "../content/site";
+
+const onAbout = Astro.url.pathname.startsWith("/about");
+---
+
+<header class="header">
+  <a class="name" href="/">{site.name}</a>
+  <nav class="nav" aria-label="Main">
+    <a href="/about/" aria-current={onAbout ? "page" : undefined}>About</a>
+    <ThemeToggle />
+  </nav>
+</header>
+
+<style>
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 2.5rem 0 3.5rem;
+  }
+
+  .name {
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .nav a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .nav a:hover,
+  .nav a[aria-current="page"] {
+    color: var(--text);
+  }
+
+  @media (min-width: 40rem) {
+    .header {
+      padding-top: 4.5rem;
+    }
+  }
+</style>

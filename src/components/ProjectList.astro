@@ -1,0 +1,73 @@
+---
+/* The project archive on the home page: projects grouped by year, newest first. */
+import ProjectRow from "./ProjectRow.astro";
+import { yearOf, type Project } from "../lib/projects";
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+const years = [...new Set(projects.map(yearOf))];
+---
+
+<section aria-labelledby="projects-heading">
+  <h2 id="projects-heading" class="label">Projects</h2>
+
+  {
+    years.map((year) => (
+      <div class="group">
+        <h3 class="year">{year}</h3>
+        <ul role="list">
+          {projects
+            .filter((project) => yearOf(project) === year)
+            .map((project) => (
+              <li>
+                <ProjectRow project={project} />
+              </li>
+            ))}
+        </ul>
+      </div>
+    ))
+  }
+
+  {projects.length === 0 && <p class="empty">Projects are on their way.</p>}
+</section>
+
+<style>
+  .label {
+    margin-bottom: 0.75rem;
+  }
+
+  .group {
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .year {
+    padding: 0.5rem 0 0.25rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .empty {
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  /* Wider screens: the year sits in its own column to the left of the rows */
+  @media (min-width: 34rem) {
+    .group {
+      display: grid;
+      grid-template-columns: 3.5rem 1fr;
+      gap: 1rem;
+    }
+
+    .year {
+      padding-top: 0.8rem;
+    }
+  }
+</style>
