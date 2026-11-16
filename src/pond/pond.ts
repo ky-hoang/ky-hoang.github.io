@@ -3,10 +3,10 @@
   about 60 times a second. Movement rules are in creatures.ts and the
   drawing is in draw.ts.
 
-  The pond is as tall as the whole page. Creatures live at page positions,
-  like the text does, so they scroll out of view and new ones swim in the
-  part of the page you scroll to. The canvas itself stays fixed to the
-  screen; each frame is drawn shifted by the scroll position.
+  The canvas is as tall as the whole page and scrolls with it, like the
+  text does, so creatures live at page positions: they scroll out of view,
+  and the part of the page you scroll to has its own. Only the part of the
+  canvas near the screen is drawn each frame.
 
   Light mode shows koi, dark mode shows fireflies. Double-click (or
   double-tap) an empty spot to drop a treat.
@@ -25,8 +25,8 @@ const RIPPLE_LASTS = 900; // ms
 const POINTER_RESTS = 3_000; // ms without movement before they lose interest
 const FADE_OUT = 0.35; // seconds, when switching between koi and fireflies
 const FADE_IN = 0.5;
-const DRAW_MARGIN = 120; // px beyond the screen edges still drawn, so nothing pops in
 const MAX_CREATURES = 24;
+const MAX_PIXELS = 12_000_000; // canvas memory cap; a very long page is drawn a little softer
 
 interface Ripple {
   x: number;
@@ -42,14 +42,13 @@ export function startPond(canvas: HTMLCanvasElement): void {
   const lessMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const kindForTheme = (): Kind => (root.dataset.theme === "dark" ? "firefly" : "koi");
 
-  // Fewer creatures per screen on phones
+  // Fewer creatures per screen on phones: about 5 on a phone, 9 on a laptop
   const small = window.innerWidth < 768;
-  const perScreen = small ? 5 : 9;
+  const perPixel = (small ? 7 : 10) / 1000;
 
   const world: World = {
     width: window.innerWidth,
-    height: root.scrollHeight,
-    viewTop: window.scrollY,
+    height: window.innerHeight,
     viewHeight: window.innerHeight,
     notice: 0,
     pointer: { x: 0, y: 0, active: false },
@@ -66,48 +65,42 @@ export function startPond(canvas: HTMLCanvasElement): void {
 
   // ---------- Page and canvas size ----------
 
-  let bufferWidth = 0;
-  let bufferHeight = 0;
-
   /**
-   * Fits the canvas to the screen. On phones the browser's toolbar shrinks
-   * and grows while scrolling, which changes the screen height many times a
-   * second. Re-making the canvas each time causes stutter, so the canvas
-   * only grows, never shrinks: the spare strip sits under the toolbar.
+   * The screen's size, used to decide how much of the page to draw. On
+   * phones the browser's toolbar shrinks and grows while scrolling, which
+   * changes this many times a second, so nothing expensive happens here.
    */
-  function fitCanvas(): void {
-    world.width = window.innerWidth;
+  function fitView(): void {
     world.viewHeight = window.innerHeight;
     world.notice = Math.min(world.width, world.viewHeight) / 3;
-    if (world.width === bufferWidth && world.viewHeight <= bufferHeight) return;
-
-    bufferWidth = world.width;
-    bufferHeight = Math.max(world.viewHeight, bufferHeight);
-    const sharpness = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(bufferWidth * sharpness);
-    canvas.height = Math.round(bufferHeight * sharpness);
-    canvas.style.height = `${bufferHeight}px`;
-    ctx!.setTransform(sharpness, 0, 0, sharpness, 0, 0);
-  }
-
-  /** Spreads `count` new creatures over the part of the page between two heights */
-  function populate(count: number, fromY: number, toY: number): void {
-    for (let i = 0; i < count && creatures.length < MAX_CREATURES; i++) {
-      creatures.push(createCreature(world.width, fromY, toY, small));
-    }
   }
 
   /**
-   * Matches the pond to the page's height: more creatures on a longer page,
-   * and none left stranded below the bottom of a shorter one.
+   * Matches the canvas to the page: the CSS already stretches it over the
+   * whole page, so this only sizes its pixel buffer and adds or removes
+   * creatures. The page's height changes as images load and as the visitor
+   * moves between pages; it does not change while scrolling.
    */
   function fitPage(): void {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (width === world.width && height === world.height && creatures.length > 0) return;
+
     const previousHeight = world.height;
-    world.height = Math.max(root.scrollHeight, world.viewHeight);
+    world.width = width;
+    world.height = height;
+    fitView();
 
-    const screens = world.height / world.viewHeight;
-    const wanted = Math.min(MAX_CREATURES, Math.round(perScreen * screens));
+    const sharpness = Math.min(
+      window.devicePixelRatio || 1,
+      2,
+      Math.sqrt(MAX_PIXELS / (world.width * world.height)),
+    );
+    canvas.width = Math.round(world.width * sharpness);
+    canvas.height = Math.round(world.height * sharpness);
+    ctx!.setTransform(sharpness, 0, 0, sharpness, 0, 0);
 
+    const wanted = Math.min(MAX_CREATURES, Math.round(world.height * perPixel));
     if (creatures.length === 0) {
       populate(wanted, 0, world.height);
     } else if (world.height > previousHeight) {
@@ -115,15 +108,17 @@ export function startPond(canvas: HTMLCanvasElement): void {
     } else if (world.height < previousHeight) {
       // The page got shorter: let go of anything now below it, which cannot be seen
       for (let i = creatures.length - 1; i >= 0 && creatures.length > wanted; i--) {
-        if (creatures[i].y > world.height + DRAW_MARGIN) creatures.splice(i, 1);
+        if (creatures[i].y > world.height) creatures.splice(i, 1);
       }
     }
     if (!running) draw(performance.now());
   }
 
-  function fit(): void {
-    fitCanvas();
-    fitPage();
+  /** Spreads `count` new creatures over the part of the page between two heights */
+  function populate(count: number, fromY: number, toY: number): void {
+    for (let i = 0; i < count && creatures.length < MAX_CREATURES; i++) {
+      creatures.push(createCreature(world.width, fromY, toY, small));
+    }
   }
 
   // ---------- One frame ----------
@@ -177,33 +172,38 @@ export function startPond(canvas: HTMLCanvasElement): void {
     }
   }
 
-  function draw(now: number): void {
-    world.viewTop = window.scrollY;
-    const top = world.viewTop - DRAW_MARGIN;
-    const bottom = world.viewTop + world.viewHeight + DRAW_MARGIN;
-    const onScreen = (y: number) => y > top && y < bottom;
+  // The strip of the page drawn last frame, which must be wiped before the next one
+  let drawnTop = 0;
+  let drawnBottom = 0;
 
-    ctx!.clearRect(0, 0, bufferWidth, bufferHeight);
+  function draw(now: number): void {
+    // Draw the screen and a full screen beyond each edge, so nothing pops in
+    // during a fast scroll. Holding still (reduced motion): draw the whole page.
+    const reach = running ? world.viewHeight : Infinity;
+    const top = Math.max(0, window.scrollY - reach);
+    const bottom = Math.min(world.height, window.scrollY + world.viewHeight + reach);
+    const inStrip = (y: number) => y > top && y < bottom;
+
+    const clearTop = Math.min(top, drawnTop);
+    const clearBottom = Math.max(bottom, drawnBottom);
+    ctx!.clearRect(0, clearTop, world.width, clearBottom - clearTop);
+    drawnTop = top;
+    drawnBottom = bottom;
+
     // Glows add their light together where they overlap
     ctx!.globalCompositeOperation = kind === "firefly" ? "lighter" : "source-over";
 
-    // Everything below is in page positions; shift by the scroll to land on screen
-    ctx!.save();
-    ctx!.translate(0, -world.viewTop);
-
     for (const ripple of ripples) {
-      if (onScreen(ripple.y)) drawRipple(ctx!, ripple.x, ripple.y, (now - ripple.born) / RIPPLE_LASTS, kind, fade);
+      if (inStrip(ripple.y)) drawRipple(ctx!, ripple.x, ripple.y, (now - ripple.born) / RIPPLE_LASTS, kind, fade);
     }
     for (const treat of world.treats) {
-      if (onScreen(treat.y)) drawTreat(ctx!, treat, kind, TREAT_BITES, now, fade);
+      if (inStrip(treat.y)) drawTreat(ctx!, treat, kind, TREAT_BITES, now, fade);
     }
     for (const creature of creatures) {
-      if (!onScreen(creature.y)) continue;
+      if (!inStrip(creature.y)) continue;
       if (kind === "koi") drawKoi(ctx!, creature, fade);
       else drawFirefly(ctx!, creature, fade);
     }
-
-    ctx!.restore();
     ctx!.globalAlpha = 1;
   }
 
@@ -305,35 +305,19 @@ export function startPond(canvas: HTMLCanvasElement): void {
 
   // ---------- Start ----------
 
-  window.addEventListener("resize", fit);
+  window.addEventListener("resize", fitView);
   document.addEventListener("visibilitychange", refresh);
   lessMotion.addEventListener("change", refresh);
 
-  // Holding still (reduced motion): keep the picture in step with the scroll
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!running) draw(performance.now());
-    },
-    { passive: true },
-  );
-
-  // The page's height changes as images load and as the visitor moves between
-  // pages. Page changes replace <body>, so watch the new one each time.
-  const pageSize = new ResizeObserver(fitPage);
-  const watchPage = () => {
-    pageSize.disconnect();
-    pageSize.observe(document.body);
-    fitPage();
-  };
-  document.addEventListener("astro:page-load", watchPage);
+  // The canvas stretches over the page, so it changes size exactly when the
+  // page does. It is kept across page changes, so one observer is enough.
+  new ResizeObserver(fitPage).observe(canvas);
 
   // The theme toggle changes data-theme on <html>; redraw the still picture if not animating
   new MutationObserver(() => {
     if (!running) refresh();
   }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
-  fit();
-  watchPage();
+  fitPage();
   refresh();
 }

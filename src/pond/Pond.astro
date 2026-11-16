@@ -2,9 +2,10 @@
 /*
   The background: koi in light mode, fireflies in dark mode.
 
-  It is a single canvas fixed behind the page. It ignores clicks, so links
-  and text selection work normally on top of it. This folder is
-  self-contained; see Base.astro for how to remove it.
+  It is a single canvas behind the page, as tall as the page, that scrolls
+  with it. It ignores clicks, so links and text selection work normally on
+  top of it. This folder is self-contained; see Base.astro for how to
+  remove it.
 */
 ---
 
@@ -19,8 +20,9 @@
 </script>
 
 <style>
+  /* Covers <body>, which is as tall as the page (body is positioned in global.css) */
   #pond {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 0;
     width: 100%;

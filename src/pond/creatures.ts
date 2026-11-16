@@ -50,8 +50,7 @@ export interface World {
   width: number;
   /** Page height, from the top of the page to the bottom */
   height: number;
-  /** The part of the page on screen right now */
-  viewTop: number;
+  /** Height of the screen */
   viewHeight: number;
   /** How close the cursor has to be before a creature notices it */
   notice: number;

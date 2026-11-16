@@ -17,6 +17,8 @@ html {
 }
 
 body {
+  /* Positioned so the pond canvas can stretch over the whole page */
+  position: relative;
   margin: 0;
   color: var(--text);
   font-family: var(--font-sans);
@@ -74,8 +76,9 @@ img {
   position: relative;
   z-index: 1;
   max-width: calc(var(--column) + 2 * var(--gutter));
+  /* svh: the screen with the phone toolbar showing, so the height holds still while scrolling */
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100svh;
   margin: 0 auto;
   padding: 0 var(--gutter);
   display: flex;
