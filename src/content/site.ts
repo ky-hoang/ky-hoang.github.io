@@ -4,6 +4,8 @@
 
   To add a link:    copy one of the lines inside `links` and edit it.
   To remove a link: delete its line.
+
+  Your photo is not set here: it is the file src/content/profile.jpg.
 */
 
 export const site = {
@@ -15,7 +17,7 @@ export const site = {
   intro:
     "I'm a Data Science student at UC Berkeley who builds full-stack and AI projects, from a hackathon-winning maternal health monitor to a search tool for my own journal. I'm looking for software engineering internships.",
 
-  // Shown as an Email link in the footer and on the About page.
+  // Shown as an Email link at the top of the home page and in the footer.
   // Leave as "" to hide it.
   email: "kyhoangg@berkeley.edu",
 
@@ -23,9 +25,11 @@ export const site = {
   // Leave as "" to hide the Résumé link.
   resume: "/resume.pdf",
 
-  // Shown in the footer and on the About page, in this order
+  // Shown at the top of the home page and in the footer, in this order.
+  // `icon` is one of: github, linkedin. Leave it out to get a plain link
+  // icon. More can be added in src/components/Icon.astro.
   links: [
-    { label: "GitHub", url: "https://github.com/ky-hoang" },
-    { label: "LinkedIn", url: "https://www.linkedin.com/in/ky-m-hoang/" },
+    { label: "GitHub", url: "https://github.com/ky-hoang", icon: "github" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/ky-m-hoang/", icon: "linkedin" },
   ],
 };

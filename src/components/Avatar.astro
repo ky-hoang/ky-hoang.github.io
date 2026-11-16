@@ -1,0 +1,112 @@
+---
+/*
+  Your photo, in a circle, at the top of the home page.
+
+  To change it: replace src/content/profile.jpg (a square photo works best;
+  other shapes are cropped to the middle). To remove it: delete that file.
+
+  It floats gently, and sends out rings like a pebble dropped in the pond
+  when the page opens and when the cursor is over it.
+*/
+import { Image } from "astro:assets";
+import { site } from "../content/site";
+
+const found = import.meta.glob<{ default: ImageMetadata }>("../content/profile.{jpg,jpeg,png,webp}", {
+  eager: true,
+});
+const photo = Object.values(found)[0]?.default;
+---
+
+{
+  photo && (
+    <div class="avatar">
+      <Image src={photo} alt={`Photo of ${site.name}`} width={360} loading="eager" />
+    </div>
+  )
+}
+
+<style>
+  .avatar {
+    position: relative;
+    width: 8.5rem;
+    height: 8.5rem;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .avatar :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    /* A thin gap, then a fine ring */
+    box-shadow:
+      0 0 0 4px var(--bg),
+      0 0 0 5px var(--line);
+  }
+
+  /* Two rings that spread out and fade */
+  .avatar::before,
+  .avatar::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    animation: ring 1.6s ease-out 0.5s 1;
+  }
+
+  .avatar::after {
+    animation-delay: 0.9s;
+  }
+
+  .avatar:hover::before,
+  .avatar:hover::after {
+    animation: ring-again 1.6s ease-out infinite;
+  }
+
+  .avatar:hover::after {
+    animation-delay: 0.5s;
+  }
+
+  @keyframes float {
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* The same motion under two names, so hovering can restart it */
+  @keyframes ring {
+    0% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.45);
+    }
+  }
+
+  @keyframes ring-again {
+    0% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.45);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .avatar,
+    .avatar::before,
+    .avatar::after,
+    .avatar:hover::before,
+    .avatar:hover::after {
+      animation: none;
+    }
+  }
+</style>

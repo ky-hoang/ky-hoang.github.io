@@ -1,13 +1,14 @@
 /*
-  How everything in the pond looks. Each creature is drawn with shapes in
-  code, so there are no image files. Koi are seen from above, which lets
-  them face any direction.
+  How everything in the pond looks. Everything is drawn with shapes in
+  code, so there are no image files. Koi and lily pads are seen from above,
+  which lets the koi face any direction.
 
   Colors for the creatures live here rather than in tokens.css, because a
   canvas cannot read CSS variables cheaply on every frame.
 */
 
 import type { Creature, Kind, Treat } from "./creatures";
+import { seeded, type Pad } from "./scenery";
 
 const TAU = Math.PI * 2;
 
@@ -25,8 +26,13 @@ const KOI_LOOKS = [
   { body: "#e0552b", patch: "#f5f2ea", fin: "#ec8a62", edge: "#a63a19" }, // red with white
 ] as const;
 
+/** The rare golden koi. It is a little more solid than the rest, and sparkles. */
+const RARE_LOOK = { body: "#f6c544", patch: "#fde9a8", fin: "#fbe3a0", edge: "#b98a12" } as const;
+const SPARKLE_COLOR = "#eeb02a";
+
 /** How see-through the koi are, so text above them stays readable */
 const KOI_OPACITY = 0.62;
+const RARE_OPACITY = 0.82;
 
 /** Points along the spine, nose to tail, and the body's half-width at each */
 const SPINE = 9;
@@ -47,12 +53,6 @@ function smoothOutline(path: Path2D, points: number[][]): void {
   path.closePath();
 }
 
-/** A repeatable "random" number from 0 to 1, so each koi keeps its own pattern */
-function seeded(seed: number, n: number): number {
-  const x = Math.sin(seed * 9301 + n * 49297) * 233280;
-  return x - Math.floor(x);
-}
-
 /** A soft fan-shaped fin pointing out from (x, y) at `angle` */
 function fin(path: Path2D, x: number, y: number, angle: number, reach: number, width: number): void {
   const cos = Math.cos(angle);
@@ -71,8 +71,8 @@ function fin(path: Path2D, x: number, y: number, angle: number, reach: number, w
 export function drawKoi(ctx: CanvasRenderingContext2D, koi: Creature, fade: number): void {
   const length = koi.length;
   const half = length * 0.14;
-  const look = KOI_LOOKS[Math.floor(koi.look * KOI_LOOKS.length) % KOI_LOOKS.length];
-  const opacity = KOI_OPACITY * fade;
+  const look = koi.rare ? RARE_LOOK : KOI_LOOKS[Math.floor(koi.look * KOI_LOOKS.length) % KOI_LOOKS.length];
+  const opacity = (koi.rare ? RARE_OPACITY : KOI_OPACITY) * fade;
 
   // The spine bends in a wave that grows toward the tail. Drawn facing right;
   // the canvas is rotated below to point the koi where it is heading.
@@ -186,6 +186,32 @@ export function drawKoi(ctx: CanvasRenderingContext2D, koi: Creature, fade: numb
   ctx.stroke(body);
 
   ctx.restore();
+
+  if (koi.rare) drawSparkles(ctx, koi, fade);
+}
+
+/** Three small stars that drift around the golden koi, twinkling in turn */
+function drawSparkles(ctx: CanvasRenderingContext2D, koi: Creature, fade: number): void {
+  ctx.fillStyle = SPARKLE_COLOR;
+  for (let n = 0; n < 3; n++) {
+    const twinkle = Math.max(0, Math.sin(koi.blink * 1.4 + n * 2.1));
+    if (twinkle < 0.05) continue;
+
+    const around = koi.blink * 0.3 + n * 2.1;
+    const x = koi.x + Math.cos(around) * koi.length * (0.34 + n * 0.08);
+    const y = koi.y + Math.sin(around) * koi.length * (0.34 + n * 0.08);
+    const size = koi.length * 0.09 * twinkle;
+
+    // A four-pointed star with sides that curve in toward the middle
+    ctx.globalAlpha = 0.9 * twinkle * fade;
+    ctx.beginPath();
+    ctx.moveTo(x, y - size);
+    ctx.quadraticCurveTo(x, y, x + size, y);
+    ctx.quadraticCurveTo(x, y, x, y + size);
+    ctx.quadraticCurveTo(x, y, x - size, y);
+    ctx.quadraticCurveTo(x, y, x, y - size);
+    ctx.fill();
+  }
 }
 
 // ---------- Fireflies ----------
@@ -263,11 +289,15 @@ export function drawTreat(
   ctx.fill();
 }
 
-/** An expanding ring where a treat lands or is finished. `age` runs from 0 to 1. */
+/**
+ * An expanding ring where a treat lands, is finished, or the water is
+ * touched. `age` runs from 0 to 1; `reach` is how far the ring spreads.
+ */
 export function drawRipple(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
+  reach: number,
   age: number,
   kind: Kind,
   fade: number,
@@ -277,6 +307,70 @@ export function drawRipple(
   ctx.strokeStyle = kind === "koi" ? "#17756c" : "#f0b955";
   ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.arc(x, y, 6 + 44 * spread, 0, TAU);
+  ctx.arc(x, y, 6 + reach * spread, 0, TAU);
   ctx.stroke();
+}
+
+// ---------- Lily pads ----------
+
+/** Green by day; by night, a dark shape the fireflies pass over */
+const PAD_LOOKS = {
+  koi: { leaf: "#8fbf9a", edge: "#5d9470", petal: "#f3b3c6", heart: "#f2c14e", opacity: 0.5 },
+  firefly: { leaf: "#1a3531", edge: "#2c544d", petal: "#7d6a80", heart: "#b98f3c", opacity: 0.75 },
+} as const;
+
+const NOTCH = 0.3; // half the width of the gap in the leaf, in radians
+const VEINS = 7;
+const PETALS = 7;
+
+/** A round leaf with a notch, a few veins, and sometimes a flower. It sways a little. */
+export function drawLilyPad(ctx: CanvasRenderingContext2D, pad: Pad, kind: Kind, now: number, fade: number): void {
+  const look = PAD_LOOKS[kind];
+  const r = pad.radius;
+
+  ctx.save();
+  ctx.translate(pad.x, pad.y);
+  ctx.rotate(pad.turn + Math.sin(now / 2600 + pad.sway * TAU) * 0.06);
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, r, NOTCH, TAU - NOTCH);
+  ctx.closePath();
+  ctx.globalAlpha = look.opacity * fade;
+  ctx.fillStyle = look.leaf;
+  ctx.fill();
+  ctx.globalAlpha = look.opacity * 0.7 * fade;
+  ctx.strokeStyle = look.edge;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Veins fanning out from the middle, away from the notch
+  ctx.globalAlpha = look.opacity * 0.35 * fade;
+  ctx.beginPath();
+  for (let n = 0; n < VEINS; n++) {
+    const angle = NOTCH + ((n + 1) / (VEINS + 1)) * (TAU - NOTCH * 2);
+    ctx.moveTo(Math.cos(angle) * r * 0.12, Math.sin(angle) * r * 0.12);
+    ctx.lineTo(Math.cos(angle) * r * 0.82, Math.sin(angle) * r * 0.82);
+  }
+  ctx.stroke();
+
+  if (pad.flower) {
+    // Sits on the side of the leaf opposite the notch
+    const flowerX = -r * 0.3;
+    ctx.globalAlpha = Math.min(1, look.opacity * 1.5) * fade;
+    ctx.fillStyle = look.petal;
+    ctx.beginPath();
+    for (let n = 0; n < PETALS; n++) {
+      const angle = (n / PETALS) * TAU;
+      const reach = r * 0.2;
+      ctx.ellipse(flowerX + Math.cos(angle) * reach, Math.sin(angle) * reach, r * 0.2, r * 0.09, angle, 0, TAU);
+    }
+    ctx.fill();
+    ctx.fillStyle = look.heart;
+    ctx.beginPath();
+    ctx.arc(flowerX, 0, r * 0.1, 0, TAU);
+    ctx.fill();
+  }
+
+  ctx.restore();
 }

@@ -1,7 +1,8 @@
 /*
   How the creatures move. The same rules drive both skins: koi by day and
   fireflies by night. Each one wanders on its own, drifts toward the cursor,
-  and heads for the nearest treat when one is dropped.
+  heads for the nearest treat when one is dropped, and darts away from a
+  click that lands too close.
 
   Nothing here draws anything; see draw.ts for that.
 */
@@ -34,6 +35,10 @@ export interface Creature {
   nibbleAt: number;
   /** 0 to 1: picks its colors */
   look: number;
+  /** One in a while, a koi is golden and sparkles */
+  rare: boolean;
+  /** Seconds left of darting away after being startled; 0 when calm */
+  startle: number;
 }
 
 /** Food by day, a spark by night */
@@ -58,11 +63,17 @@ export interface World {
   treats: Treat[];
 }
 
-/** Pixels per second, turning speed, and how restlessly each kind wanders */
+/**
+ * Pixels per second, turning speed, and how restlessly each kind wanders.
+ * `chase` and `dart` multiply the speed when after a treat or startled.
+ */
 const TUNING = {
-  koi: { slow: 22, fast: 38, turn: 2.0, roamMin: 1.6, roamMax: 4.2, swing: 1.3, chase: 2.8 },
-  firefly: { slow: 14, fast: 26, turn: 3.2, roamMin: 0.6, roamMax: 1.8, swing: 2.4, chase: 2.4 },
+  koi: { slow: 22, fast: 38, turn: 2.0, roamMin: 1.6, roamMax: 4.2, swing: 1.3, chase: 2.8, dart: 9 },
+  firefly: { slow: 14, fast: 26, turn: 3.2, roamMin: 0.6, roamMax: 1.8, swing: 2.4, chase: 2.4, dart: 9 },
 } as const;
+
+const RARE_CHANCE = 0.04; // how often a new koi is a golden one
+const STARTLE_LASTS = 0.8; // seconds
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
@@ -84,7 +95,16 @@ export function createCreature(width: number, fromY: number, toY: number, small:
     offsetY: rand(-50, 50),
     nibbleAt: -Infinity,
     look: Math.random(),
+    rare: Math.random() < RARE_CHANCE,
+    startle: 0,
   };
+}
+
+/** Sends a creature darting away from a point, such as a click */
+export function startle(creature: Creature, fromX: number, fromY: number): void {
+  creature.roamAngle = Math.atan2(creature.y - fromY, creature.x - fromX) + rand(-0.5, 0.5);
+  creature.roamTimer = 2;
+  creature.startle = STARTLE_LASTS;
 }
 
 /** Turns from angle `from` toward `to` by fraction `amount`, the short way round */
@@ -137,11 +157,18 @@ export function stepCreature(creature: Creature, kind: Kind, world: World, dt: n
 
   let heading = creature.roamAngle;
   let speed = cruise;
+  let turn: number = tuning.turn;
 
   const treat = nearestTreat(creature, world.treats);
   const treatDistance = treat ? Math.hypot(treat.x - creature.x, treat.y - creature.y) : Infinity;
 
-  if (treat && treatDistance < world.viewHeight * 1.5) {
+  if (creature.startle > 0) {
+    // Startled: whip round and dart away, easing back to a cruise
+    const fright = creature.startle / STARTLE_LASTS;
+    speed = cruise * (1 + (tuning.dart - 1) * fright * fright);
+    turn = tuning.turn * 6;
+    creature.startle = Math.max(0, creature.startle - dt);
+  } else if (treat && treatDistance < world.viewHeight * 1.5) {
     // A treat within reach: go straight for it, quickly, then slow down to nibble
     heading = Math.atan2(treat.y - creature.y, treat.x - creature.x);
     speed = treatDistance > creature.length * 0.8 ? cruise * tuning.chase : cruise * 0.4;
@@ -161,7 +188,7 @@ export function stepCreature(creature: Creature, kind: Kind, world: World, dt: n
   }
 
   // Turn smoothly rather than snapping, then move forward
-  creature.angle = turnToward(creature.angle, heading, 1 - Math.exp(-tuning.turn * dt));
+  creature.angle = turnToward(creature.angle, heading, 1 - Math.exp(-turn * dt));
   creature.x += Math.cos(creature.angle) * speed * dt;
   creature.y += Math.sin(creature.angle) * speed * dt;
 

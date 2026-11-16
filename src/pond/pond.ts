@@ -9,11 +9,14 @@
   canvas near the screen is drawn each frame.
 
   Light mode shows koi, dark mode shows fireflies. Double-click (or
-  double-tap) an empty spot to drop a treat.
+  double-tap) an empty spot to drop a treat. A single click touches the
+  water, and any creature close by darts away. Lily pads float at the
+  sides (see scenery.ts).
 */
 
-import { createCreature, mouthOf, stepCreature, type Creature, type Kind, type World } from "./creatures";
-import { drawFirefly, drawKoi, drawRipple, drawTreat } from "./draw";
+import { createCreature, mouthOf, startle, stepCreature, type Creature, type Kind, type World } from "./creatures";
+import { drawFirefly, drawKoi, drawLilyPad, drawRipple, drawTreat } from "./draw";
+import { placePads, type Pad } from "./scenery";
 
 const TREAT_BITES = 5; // bites before a treat is gone
 const TREAT_LASTS = 20_000; // ms before an uneaten treat disappears
@@ -22,6 +25,9 @@ const BITE_GAP = 550; // ms between one creature's bites
 const BITE_REACH = 16; // px
 const MAX_TREATS = 5;
 const RIPPLE_LASTS = 900; // ms
+const TREAT_RIPPLE = 44; // px a ripple spreads when a treat lands or is finished
+const TOUCH_RIPPLE = 18; // px, for a single click on the water
+const STARTLE_REACH = 120; // px around a click within which creatures dart away
 const POINTER_RESTS = 3_000; // ms without movement before they lose interest
 const FADE_OUT = 0.35; // seconds, when switching between koi and fireflies
 const FADE_IN = 0.5;
@@ -32,6 +38,8 @@ interface Ripple {
   x: number;
   y: number;
   born: number;
+  /** How far it spreads, in pixels */
+  reach: number;
 }
 
 export function startPond(canvas: HTMLCanvasElement): void {
@@ -57,6 +65,7 @@ export function startPond(canvas: HTMLCanvasElement): void {
 
   const creatures: Creature[] = [];
   const ripples: Ripple[] = [];
+  let pads: Pad[] = [];
 
   let kind = kindForTheme(); // which skin is showing
   let fade = 1; // 0 = invisible, 1 = fully shown
@@ -99,6 +108,8 @@ export function startPond(canvas: HTMLCanvasElement): void {
     canvas.width = Math.round(world.width * sharpness);
     canvas.height = Math.round(world.height * sharpness);
     ctx!.setTransform(sharpness, 0, 0, sharpness, 0, 0);
+
+    pads = placePads(world.width, world.height);
 
     const wanted = Math.min(MAX_CREATURES, Math.round(world.height * perPixel));
     if (creatures.length === 0) {
@@ -160,7 +171,7 @@ export function startPond(canvas: HTMLCanvasElement): void {
         creature.nibbleAt = now;
         treat.life -= 1;
         if (treat.life <= 0) {
-          ripples.push({ x: treat.x, y: treat.y, born: now });
+          ripples.push({ x: treat.x, y: treat.y, born: now, reach: TREAT_RIPPLE });
           world.treats.splice(i, 1);
         }
         break;
@@ -190,11 +201,22 @@ export function startPond(canvas: HTMLCanvasElement): void {
     drawnTop = top;
     drawnBottom = bottom;
 
-    // Glows add their light together where they overlap
-    ctx!.globalCompositeOperation = kind === "firefly" ? "lighter" : "source-over";
+    const drawPads = () => {
+      for (const pad of pads) {
+        if (inStrip(pad.y)) drawLilyPad(ctx!, pad, kind, now, fade);
+      }
+    };
+
+    // Fireflies fly over the lily pads, and their glows add their light
+    // together where they overlap. Koi swim under the pads, drawn last.
+    if (kind === "firefly") {
+      drawPads();
+      ctx!.globalCompositeOperation = "lighter";
+    }
 
     for (const ripple of ripples) {
-      if (inStrip(ripple.y)) drawRipple(ctx!, ripple.x, ripple.y, (now - ripple.born) / RIPPLE_LASTS, kind, fade);
+      if (!inStrip(ripple.y)) continue;
+      drawRipple(ctx!, ripple.x, ripple.y, ripple.reach, (now - ripple.born) / RIPPLE_LASTS, kind, fade);
     }
     for (const treat of world.treats) {
       if (inStrip(treat.y)) drawTreat(ctx!, treat, kind, TREAT_BITES, now, fade);
@@ -204,6 +226,9 @@ export function startPond(canvas: HTMLCanvasElement): void {
       if (kind === "koi") drawKoi(ctx!, creature, fade);
       else drawFirefly(ctx!, creature, fade);
     }
+
+    if (kind === "koi") drawPads();
+    ctx!.globalCompositeOperation = "source-over";
     ctx!.globalAlpha = 1;
   }
 
@@ -262,8 +287,23 @@ export function startPond(canvas: HTMLCanvasElement): void {
     const y = screenY + window.scrollY;
     world.treats.push({ x, y, born: now, life: TREAT_BITES });
     if (world.treats.length > MAX_TREATS) world.treats.shift();
-    ripples.push({ x, y, born: now });
+    ripples.push({ x, y, born: now, reach: TREAT_RIPPLE });
   }
+
+  // A single click touches the water: a small ripple, and anything close darts away
+  window.addEventListener("click", (event) => {
+    if (lessMotion.matches || fade < 1 || event.detail > 1 || isControl(event.target)) return;
+    // Not when this tap has just dropped a treat, or has just finished selecting text
+    const now = performance.now();
+    if (now - lastFedAt < 400 || getSelection()?.toString()) return;
+
+    const x = event.clientX;
+    const y = event.clientY + window.scrollY;
+    ripples.push({ x, y, born: now, reach: TOUCH_RIPPLE });
+    for (const creature of creatures) {
+      if (Math.hypot(creature.x - x, creature.y - y) < STARTLE_REACH) startle(creature, x, y);
+    }
+  });
 
   // A double-click normally highlights the word under the cursor. Stop that,
   // so feeding never selects text. Dragging to select still works as usual.

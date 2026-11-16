@@ -1,22 +1,51 @@
 ---
 /*
-  Your links, read from src/content/site.ts. Used in the footer and on the
-  About page, so editing site.ts updates both.
+  Your links, read from src/content/site.ts, each with its icon.
+
+  Two looks:
+  - "large": round icon buttons, with the résumé as a labeled pill. Used at
+    the top of the home page. The name of each link shows on hover.
+  - "small": a quiet row of icons with their names. Used in the footer.
 */
+import Icon from "./Icon.astro";
 import { site } from "../content/site";
 
-const links = [
+interface Props {
+  size?: "large" | "small";
+}
+
+const { size = "small" } = Astro.props;
+
+interface Link {
+  label: string;
+  url: string;
+  icon?: string;
+}
+
+const links: Link[] = [
   ...site.links,
-  ...(site.email ? [{ label: "Email", url: `mailto:${site.email}` }] : []),
-  ...(site.resume ? [{ label: "Résumé", url: site.resume }] : []),
+  ...(site.email ? [{ label: "Email", url: `mailto:${site.email}`, icon: "email" }] : []),
+  ...(site.resume ? [{ label: "Résumé", url: site.resume, icon: "resume" }] : []),
 ];
+
+// On the home page the résumé stands out as a pill with its name written out
+const isPill = (link: Link) => size === "large" && link.icon === "resume";
+const showName = (link: Link) => size === "small" || isPill(link);
 ---
 
-<ul class="links" role="list">
+<ul class:list={["links", size]} role="list">
   {
     links.map((link) => (
       <li>
-        <a href={link.url}>{link.label}</a>
+        <a
+          class:list={{ pill: isPill(link) }}
+          href={link.url}
+          aria-label={showName(link) ? undefined : link.label}
+          data-tip={showName(link) ? undefined : link.label}
+        >
+          <Icon name={link.icon} size={size === "large" ? 20 : 15} />
+          {showName(link) && <span>{link.label}</span>}
+        </a>
       </li>
     ))
   }
@@ -26,6 +55,90 @@ const links = [
   .links {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  /* ---------- Small: footer ---------- */
+
+  .small {
     gap: 0.5rem 1.25rem;
+  }
+
+  .small a {
+    gap: 0.4rem;
+  }
+
+  /* ---------- Large: top of the home page ---------- */
+
+  .large {
+    gap: 0.5rem;
+  }
+
+  .large a {
+    position: relative;
+    justify-content: center;
+    gap: 0.45rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--muted);
+    transition:
+      transform 0.2s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .large a:hover,
+  .large a:focus-visible {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .large .pill {
+    padding: 0 1.1rem 0 0.9rem;
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+
+  /* The link's name, floating above its icon on hover */
+  .large a[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 0.45rem);
+    left: 50%;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, 4px);
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+    pointer-events: none;
+  }
+
+  .large a[data-tip]:hover::after,
+  .large a[data-tip]:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .large a:hover,
+    .large a:focus-visible {
+      transform: none;
+    }
   }
 </style>

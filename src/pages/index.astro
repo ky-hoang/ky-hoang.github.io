@@ -1,6 +1,8 @@
 ---
-/* Home page: a short intro, then the project archive. */
+/* Home page: your photo, a short intro and your links, then the project archive. */
 import Base from "../layouts/Base.astro";
+import Avatar from "../components/Avatar.astro";
+import ContactLinks from "../components/ContactLinks.astro";
 import ProjectList from "../components/ProjectList.astro";
 import { getProjects } from "../lib/projects";
 import { site } from "../content/site";
@@ -9,15 +11,26 @@ const projects = await getProjects();
 ---
 
 <Base>
-  <h1 class="sr-only">{site.name}</h1>
-  <p class="intro">{site.intro}</p>
+  <section class="hello">
+    <h1 class="sr-only">{site.name}</h1>
+    <Avatar />
+    <p class="intro">{site.intro}</p>
+    <ContactLinks size="large" />
+  </section>
+
   <ProjectList projects={projects} />
 </Base>
 
 <style>
+  .hello {
+    display: grid;
+    justify-items: start;
+    gap: 1.75rem;
+    margin-bottom: 4rem;
+  }
+
   .intro {
     max-width: 36rem;
-    margin-bottom: 4rem;
     font-family: var(--font-serif);
     font-size: 1.5rem;
     line-height: 1.4;
