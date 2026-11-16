@@ -44,9 +44,17 @@ export interface Treat {
   life: number;
 }
 
+/** The pond covers the whole page, so all positions here are page positions */
 export interface World {
+  /** Page width */
   width: number;
+  /** Page height, from the top of the page to the bottom */
   height: number;
+  /** The part of the page on screen right now */
+  viewTop: number;
+  viewHeight: number;
+  /** How close the cursor has to be before a creature notices it */
+  notice: number;
   pointer: { x: number; y: number; active: boolean };
   treats: Treat[];
 }
@@ -59,10 +67,11 @@ const TUNING = {
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
-export function createCreature(width: number, height: number, small: boolean): Creature {
+/** A new creature somewhere between page heights `fromY` and `toY` */
+export function createCreature(width: number, fromY: number, toY: number, small: boolean): Creature {
   return {
     x: rand(0, width),
-    y: rand(0, height),
+    y: rand(fromY, toY),
     angle: rand(0, Math.PI * 2),
     pace: Math.random(),
     length: small ? rand(36, 54) : rand(44, 72),
@@ -112,7 +121,7 @@ export function stepCreature(creature: Creature, kind: Kind, world: World, dt: n
     creature.roamAngle += rand(-tuning.swing, tuning.swing);
   }
 
-  // Strayed past the edge of the screen: head back toward the middle
+  // Strayed past the edge of the page: head back in, toward a spot not far inside
   const edge = 30;
   const outside =
     creature.x < -edge ||
@@ -120,10 +129,10 @@ export function stepCreature(creature: Creature, kind: Kind, world: World, dt: n
     creature.y < -edge ||
     creature.y > world.height + edge;
   if (outside && creature.roamTimer < 2) {
-    creature.roamAngle = Math.atan2(
-      world.height * rand(0.25, 0.75) - creature.y,
-      world.width * rand(0.25, 0.75) - creature.x,
-    );
+    const inset = Math.min(300, world.height / 2);
+    const targetY =
+      creature.y < 0 ? rand(60, inset) : creature.y > world.height ? world.height - rand(60, inset) : creature.y;
+    creature.roamAngle = Math.atan2(targetY - creature.y, world.width * rand(0.25, 0.75) - creature.x);
     creature.roamTimer = 2.5;
   }
 
@@ -131,21 +140,25 @@ export function stepCreature(creature: Creature, kind: Kind, world: World, dt: n
   let speed = cruise;
 
   const treat = nearestTreat(creature, world.treats);
-  if (treat) {
-    // A treat is out: go straight for it, quickly, then slow down to nibble
-    const distance = Math.hypot(treat.x - creature.x, treat.y - creature.y);
+  const treatDistance = treat ? Math.hypot(treat.x - creature.x, treat.y - creature.y) : Infinity;
+
+  if (treat && treatDistance < world.viewHeight * 1.5) {
+    // A treat within reach: go straight for it, quickly, then slow down to nibble
     heading = Math.atan2(treat.y - creature.y, treat.x - creature.x);
-    speed = distance > creature.length * 0.8 ? cruise * tuning.chase : cruise * 0.4;
+    speed = treatDistance > creature.length * 0.8 ? cruise * tuning.chase : cruise * 0.4;
     creature.roamAngle = heading;
   } else if (world.pointer.active) {
-    // No treat: lean toward the cursor, more strongly the farther away it is
+    // Curiosity, not obedience: only a creature near the cursor notices it,
+    // drifts gently toward its own spot beside it, and swims on past once close
     const targetX = world.pointer.x + creature.offsetX;
     const targetY = world.pointer.y + creature.offsetY;
     const distance = Math.hypot(targetX - creature.x, targetY - creature.y);
-    const pull = Math.min(1, Math.max(0, (distance - 50) / 300)) * 0.7;
-    const towardPointer = Math.atan2(targetY - creature.y, targetX - creature.x);
-    heading = turnToward(creature.roamAngle, towardPointer, pull);
-    speed = cruise * (1 + pull * 0.9);
+    if (distance > 40 && distance < world.notice) {
+      const pull = (1 - distance / world.notice) * 0.5;
+      const towardPointer = Math.atan2(targetY - creature.y, targetX - creature.x);
+      heading = turnToward(creature.roamAngle, towardPointer, pull);
+      speed = cruise * (1 + pull * 0.6);
+    }
   }
 
   // Turn smoothly rather than snapping, then move forward
