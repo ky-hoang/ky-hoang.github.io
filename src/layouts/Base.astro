@@ -3,6 +3,7 @@
   The frame shared by every page: the <head>, header, footer and the
   pond background. Each page's own content goes where <slot /> is.
 */
+import { ClientRouter } from "astro:transitions";
 import "../styles/tokens.css";
 import "../styles/global.css";
 import Header from "../components/Header.astro";
@@ -43,11 +44,20 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
     />
 
     <!--
+      Page changes swap only the content, so the pond and the header stay
+      put and the koi keep swimming from one page to the next.
+    -->
+    <ClientRouter />
+
+    <!--
       Sets light or dark before the page is drawn, so it never flashes the
       wrong one. Uses the visitor's saved choice, else their system setting.
+      Runs again after each page change, since the new page's <html> tag
+      would otherwise reset the theme.
     -->
     <script is:inline>
       (function () {
+        function applyTheme() {
         var saved = null;
         try {
           saved = localStorage.getItem("theme");
@@ -59,6 +69,9 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
               ? "dark"
               : "light";
         document.documentElement.dataset.theme = theme;
+        }
+        applyTheme();
+        document.addEventListener("astro:after-swap", applyTheme);
       })();
     </script>
   </head>
@@ -68,7 +81,7 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
 
     <div class="page">
       <Header />
-      <main>
+      <main transition:animate="fade">
         <slot />
       </main>
       <Footer />

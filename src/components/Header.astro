@@ -6,7 +6,7 @@ import { site } from "../content/site";
 const onAbout = Astro.url.pathname.startsWith("/about");
 ---
 
-<header class="header">
+<header class="header" transition:animate="none">
   <a class="name" href="/">{site.name}</a>
   <nav class="nav" aria-label="Main">
     <a href="/about/" aria-current={onAbout ? "page" : undefined}>About</a>

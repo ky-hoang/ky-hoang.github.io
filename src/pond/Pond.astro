@@ -8,7 +8,8 @@
 */
 ---
 
-<canvas id="pond" aria-hidden="true"></canvas>
+<!-- transition:persist keeps this same canvas, and the fish on it, across page changes -->
+<canvas id="pond" aria-hidden="true" transition:persist></canvas>
 
 <script>
   import { startPond } from "./pond";
