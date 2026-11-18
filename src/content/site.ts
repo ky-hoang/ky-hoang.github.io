@@ -12,13 +12,10 @@ export const site = {
   // Shown in the top-left corner and in the browser tab
   name: "Ky Hoang",
 
-  // The big hello at the top of the home page. A 👋 in it waves once
+  // A few sentences at the top of the home page. A 👋 in it waves once
   // when the page opens.
-  greeting: "Hi! I'm Ky 👋",
-
-  // A few sentences under the greeting
   intro:
-    "Data Science student at UC Berkeley, hackathon regular, and happiest building things that help people. I'm looking for software engineering internships. Below are a few things I've made, and a pond you can feed.",
+    "Hi! I'm Ky 👋 Data Science student at UC Berkeley, hackathon regular, and happiest building things that help people. I'm looking for software engineering internships. Below are a few things I've made (and a pond you can feed).",
 
   // One sentence about you for search results and link previews
   description:

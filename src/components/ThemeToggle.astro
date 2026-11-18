@@ -74,11 +74,15 @@
     background: var(--bg);
     color: var(--muted);
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
 
   .toggle:hover {
     border-color: var(--accent);
+    background: var(--hover);
     color: var(--accent);
   }
 

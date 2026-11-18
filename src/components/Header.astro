@@ -23,7 +23,7 @@ const onAbout = Astro.url.pathname.startsWith("/about");
     padding: 2.5rem 0 3.5rem;
   }
 
-  /* Your name and About are soft pills, so they read as buttons */
+  /* Your name and About sit in soft pills, so they read as buttons */
   .name,
   .nav a {
     display: inline-flex;
@@ -34,29 +34,19 @@ const onAbout = Astro.url.pathname.startsWith("/about");
     background: var(--bg);
     text-decoration: none;
     transition:
-      transform 0.2s ease,
       border-color 0.15s ease,
-      color 0.15s ease,
-      background-color 0.15s ease;
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
 
   .name {
-    gap: 0.45rem;
-    margin-left: -0.25rem;
-    padding: 0 1rem 0 0.85rem;
+    /* Pulled left so the text still lines up with the column below */
+    margin-left: -1rem;
+    padding: 0 1rem;
     font-family: var(--font-serif);
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 500;
     letter-spacing: -0.01em;
-  }
-
-  /* A small dot in the accent color, like a koi seen from far away */
-  .name::before {
-    content: "";
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 50%;
-    background: var(--accent);
   }
 
   .nav {
@@ -66,30 +56,22 @@ const onAbout = Astro.url.pathname.startsWith("/about");
   }
 
   .nav a {
-    padding: 0 0.95rem;
+    padding: 0 1rem;
     font-size: var(--text-sm);
     color: var(--muted);
   }
 
   .name:hover,
   .nav a:hover {
-    transform: translateY(-2px);
     border-color: var(--accent);
+    background: var(--hover);
     color: var(--accent);
   }
 
-  /* The page you are on: filled in softly */
+  /* The page you are on is filled in softly */
   .nav a[aria-current="page"] {
     background: var(--hover);
-    border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
     color: var(--text);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .name:hover,
-    .nav a:hover {
-      transform: none;
-    }
   }
 
   @media (min-width: 40rem) {
