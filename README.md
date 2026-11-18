@@ -21,7 +21,7 @@ A personal site built with [Astro](https://astro.build), plain CSS and TypeScrip
 | Change your photo | Replace `src/content/profile.jpg` with a square photo. Delete the file to show no photo |
 | Change your name, tagline, intro or search description | `src/content/site.ts` |
 | Edit the About page | `src/content/about.md` for your story |
-| Add or edit a job, skill or award | `src/content/resume.ts`. Jobs show on the home page and the About page; keep them in step with your résumé |
+| Add or edit a job, skill or award | `src/content/resume.ts`. Jobs show on the home page, skills and awards on the About page; keep them in step with your résumé |
 | Add or swap your résumé | Save it as `public/resume.pdf`, and set `resume: "/resume.pdf"` in `src/content/site.ts` |
 | Change colors, fonts or widths | `src/styles/tokens.css` |
 | Change the link preview picture | Replace `public/og.jpg` (1200 × 630 pixels). This is the card shown when the site's address is pasted into a chat or a post. A project with a `cover` uses its cover instead |

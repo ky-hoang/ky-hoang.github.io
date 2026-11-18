@@ -1,22 +1,13 @@
 ---
 /*
   Your jobs, from src/content/resume.ts: role and place on the left, dates
-  on the right, and one line on what you did. Used on the home page and
-  the About page.
+  on the right, and one line on what you did. Shown on the home page.
 */
 import { experience } from "../content/resume";
-
-interface Props {
-  /** The heading's level, so it fits the page it sits on */
-  headingLevel?: 2 | 3;
-}
-
-const { headingLevel = 2 } = Astro.props;
-const Heading = `h${headingLevel}` as "h2" | "h3";
 ---
 
 <section class="experience" aria-labelledby="experience-heading">
-  <Heading id="experience-heading" class="label">Experience</Heading>
+  <h2 id="experience-heading" class="label">Experience</h2>
   <ul role="list">
     {
       experience.map((job) => (

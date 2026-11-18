@@ -1,11 +1,10 @@
 ---
 /*
-  About page. The story comes from src/content/about.md; experience,
-  skills and awards come from src/content/resume.ts. Your links are in the
-  footer.
+  About page. The story comes from src/content/about.md; skills and awards
+  come from src/content/resume.ts. Your experience is on the home page and
+  your links are in the footer.
 */
 import Base from "../layouts/Base.astro";
-import Experience from "../components/Experience.astro";
 import { Content } from "../content/about.md";
 import { skills, awards } from "../content/resume";
 import { site } from "../content/site";
@@ -22,8 +21,6 @@ import { site } from "../content/site";
   </div>
 
   <div class="sections">
-    <Experience />
-
     <section aria-labelledby="skills-heading">
       <h2 id="skills-heading" class="label">Skills</h2>
       <dl class="skills">

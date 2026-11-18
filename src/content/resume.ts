@@ -1,7 +1,7 @@
 /*
-  Your experience, skills and awards. Shown on the About page, and the
-  experience also appears on the home page, so recruiters see it without
-  opening your résumé. Keep this in step with public/resume.pdf.
+  Your experience, skills and awards. Experience shows on the home page,
+  so recruiters see it without opening your résumé; skills and awards show
+  on the About page. Keep this in step with public/resume.pdf.
 
   To add a job: copy one of the entries in `experience` and edit it.
   Newest first. Leave `end` as "" for a job you still have.
