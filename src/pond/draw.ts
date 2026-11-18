@@ -1,14 +1,13 @@
 /*
   How everything in the pond looks. Everything is drawn with shapes in
-  code, so there are no image files. Koi and lily pads are seen from above,
-  which lets the koi face any direction.
+  code, so there are no image files. Koi are seen from above, which lets
+  them face any direction.
 
   Colors for the creatures live here rather than in tokens.css, because a
   canvas cannot read CSS variables cheaply on every frame.
 */
 
 import type { Creature, Kind, Treat } from "./creatures";
-import { seeded, type Pad } from "./scenery";
 
 const TAU = Math.PI * 2;
 
@@ -39,6 +38,12 @@ const SPINE = 9;
 const PROFILE = [0.55, 0.86, 1, 0.98, 0.88, 0.72, 0.54, 0.38, 0.26];
 const spineX = new Array<number>(SPINE).fill(0);
 const spineY = new Array<number>(SPINE).fill(0);
+
+/** A repeatable "random" number from 0 to 1, so each koi keeps its own pattern */
+function seeded(seed: number, n: number): number {
+  const x = Math.sin(seed * 9301 + n * 49297) * 233280;
+  return x - Math.floor(x);
+}
 
 /** Traces a smooth closed outline through a list of points */
 function smoothOutline(path: Path2D, points: number[][]): void {
@@ -309,68 +314,4 @@ export function drawRipple(
   ctx.beginPath();
   ctx.arc(x, y, 6 + reach * spread, 0, TAU);
   ctx.stroke();
-}
-
-// ---------- Lily pads ----------
-
-/** Green by day; by night, a dark shape the fireflies pass over */
-const PAD_LOOKS = {
-  koi: { leaf: "#8fbf9a", edge: "#5d9470", petal: "#f3b3c6", heart: "#f2c14e", opacity: 0.5 },
-  firefly: { leaf: "#1a3531", edge: "#2c544d", petal: "#7d6a80", heart: "#b98f3c", opacity: 0.75 },
-} as const;
-
-const NOTCH = 0.3; // half the width of the gap in the leaf, in radians
-const VEINS = 7;
-const PETALS = 7;
-
-/** A round leaf with a notch, a few veins, and sometimes a flower. It sways a little. */
-export function drawLilyPad(ctx: CanvasRenderingContext2D, pad: Pad, kind: Kind, now: number, fade: number): void {
-  const look = PAD_LOOKS[kind];
-  const r = pad.radius;
-
-  ctx.save();
-  ctx.translate(pad.x, pad.y);
-  ctx.rotate(pad.turn + Math.sin(now / 2600 + pad.sway * TAU) * 0.06);
-
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.arc(0, 0, r, NOTCH, TAU - NOTCH);
-  ctx.closePath();
-  ctx.globalAlpha = look.opacity * fade;
-  ctx.fillStyle = look.leaf;
-  ctx.fill();
-  ctx.globalAlpha = look.opacity * 0.7 * fade;
-  ctx.strokeStyle = look.edge;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Veins fanning out from the middle, away from the notch
-  ctx.globalAlpha = look.opacity * 0.35 * fade;
-  ctx.beginPath();
-  for (let n = 0; n < VEINS; n++) {
-    const angle = NOTCH + ((n + 1) / (VEINS + 1)) * (TAU - NOTCH * 2);
-    ctx.moveTo(Math.cos(angle) * r * 0.12, Math.sin(angle) * r * 0.12);
-    ctx.lineTo(Math.cos(angle) * r * 0.82, Math.sin(angle) * r * 0.82);
-  }
-  ctx.stroke();
-
-  if (pad.flower) {
-    // Sits on the side of the leaf opposite the notch
-    const flowerX = -r * 0.3;
-    ctx.globalAlpha = Math.min(1, look.opacity * 1.5) * fade;
-    ctx.fillStyle = look.petal;
-    ctx.beginPath();
-    for (let n = 0; n < PETALS; n++) {
-      const angle = (n / PETALS) * TAU;
-      const reach = r * 0.2;
-      ctx.ellipse(flowerX + Math.cos(angle) * reach, Math.sin(angle) * reach, r * 0.2, r * 0.09, angle, 0, TAU);
-    }
-    ctx.fill();
-    ctx.fillStyle = look.heart;
-    ctx.beginPath();
-    ctx.arc(flowerX, 0, r * 0.1, 0, TAU);
-    ctx.fill();
-  }
-
-  ctx.restore();
 }

@@ -19,12 +19,12 @@ A personal site built with [Astro](https://astro.build), plain CSS and TypeScrip
 | Add, remove or edit a link | Edit one line in `src/content/site.ts`. Each link can name an `icon` |
 | Add a new icon | Add an entry to the list in `src/components/Icon.astro` |
 | Change your photo | Replace `src/content/profile.jpg` with a square photo. Delete the file to show no photo |
-| Change your name or intro | `src/content/site.ts` |
+| Change your name, intro or search description | `src/content/site.ts` |
 | Edit the About page | `src/content/about.md` |
 | Add or swap your résumé | Save it as `public/resume.pdf`, and set `resume: "/resume.pdf"` in `src/content/site.ts` |
 | Change colors, fonts or widths | `src/styles/tokens.css` |
 | Change the link preview picture | Replace `public/og.png` (1200 × 630 pixels). This is the card shown when the site's address is pasted into a chat or a post |
-| Remove the pond | Delete `src/pond/`, the two Pond lines in `src/layouts/Base.astro`, and the hint in `src/components/Footer.astro` |
+| Remove the pond | Delete `src/pond/`, the two Pond lines in `src/layouts/Base.astro`, and the "Psst" hint in `src/components/Footer.astro` |
 
 The folder name of a project becomes its address: `src/content/projects/my-project/` is served at `/projects/my-project/`.
 
@@ -65,15 +65,14 @@ Commit your changes and push to the `main` branch. GitHub builds the site and pu
 
 ## The pond
 
-The background is one `<canvas>` behind the page, as tall as the page, that scrolls with it. Koi swim in light mode and fireflies drift in dark mode; double-click (or double-tap on a phone) an empty spot to drop food, or a spark at night. A single click touches the water, and anything close by darts away. Lily pads float at the sides, and once in a while one of the koi is a golden one that sparkles. The pond keeps going as you move between pages, holds still for visitors who have asked their device for reduced motion, and pauses when the tab is hidden.
+The background is one `<canvas>` behind the page, as tall as the page, that scrolls with it. Koi swim in light mode and fireflies drift in dark mode; double-click (or double-tap on a phone) an empty spot to drop food, or a spark at night. A single click touches the water, and anything close by darts away. Once in a while one of the koi is a golden one that sparkles. The pond keeps going as you move between pages, holds still for visitors who have asked their device for reduced motion, and pauses when the tab is hidden.
 
 | To change this | Look in |
 |---|---|
 | How many creatures, how long food lasts | The constants at the top of `src/pond/pond.ts` |
 | How fast they swim, how far they wander, how often a golden koi appears | `TUNING` and `RARE_CHANCE` in `src/pond/creatures.ts` |
-| How many lily pads, and where they sit | `src/pond/scenery.ts` |
-| Koi colors and opacity, firefly glow, lily pad colors | `KOI_LOOKS`, the firefly section and `PAD_LOOKS` in `src/pond/draw.ts` |
-| The hint in the footer | `src/components/Footer.astro` |
+| Koi colors and opacity, firefly glow | `KOI_LOOKS` and the firefly section of `src/pond/draw.ts` |
+| The hint and the quote in the footer | `src/components/Footer.astro` |
 
 ## Where things are
 
@@ -93,7 +92,6 @@ src/
 │   ├── Pond.astro        the canvas element and its placement
 │   ├── pond.ts           runs the pond: sizing, the frame loop, feeding, the cursor
 │   ├── creatures.ts      how creatures move
-│   ├── scenery.ts        where the lily pads sit
 │   └── draw.ts           how everything looks
 └── styles/               tokens.css (colors, fonts, widths) and global.css
 public/                   files served as they are: résumé, favicon, link preview picture

@@ -8,13 +8,21 @@ import { getProjects } from "../lib/projects";
 import { site } from "../content/site";
 
 const projects = await getProjects();
+
+// Splits the intro around the 👋, so the hand can be animated on its own
+const [beforeWave, ...rest] = site.intro.split("👋");
+const afterWave = rest.join("👋");
 ---
 
 <Base>
   <section class="hello">
     <h1 class="sr-only">{site.name}</h1>
     <Avatar />
-    <p class="intro">{site.intro}</p>
+    <p class="intro">
+      {beforeWave}
+      {rest.length > 0 && <span class="wave">👋</span>}
+      {afterWave}
+    </p>
     <ContactLinks size="large" />
   </section>
 
@@ -36,6 +44,34 @@ const projects = await getProjects();
     line-height: 1.4;
     letter-spacing: -0.01em;
     text-wrap: pretty;
+  }
+
+  /* The hand waves a few times when the page opens, then rests */
+  .wave {
+    display: inline-block;
+    transform-origin: 70% 80%;
+    animation: wave 1.6s ease-in-out 0.4s 1;
+  }
+
+  @keyframes wave {
+    0%, 60%, 100% {
+      transform: rotate(0deg);
+    }
+    10%, 30% {
+      transform: rotate(16deg);
+    }
+    20%, 40% {
+      transform: rotate(-8deg);
+    }
+    50% {
+      transform: rotate(10deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wave {
+      animation: none;
+    }
   }
 
   @media (max-width: 34rem) {

@@ -12,10 +12,14 @@ export const site = {
   // Shown in the top-left corner and in the browser tab
   name: "Ky Hoang",
 
-  // One or two sentences at the top of the home page.
-  // Also used as the description in search results and link previews.
+  // A few sentences at the top of the home page. A 👋 in it waves once
+  // when the page opens.
   intro:
-    "I'm a Data Science student at UC Berkeley who builds full-stack and AI projects, from a hackathon-winning maternal health monitor to a search tool for my own journal. I'm looking for software engineering internships.",
+    "Hi! I'm Ky 👋 Data Science student at UC Berkeley, hackathon regular, and happiest building things that help people. I'm looking for software engineering internships. Below are a few things I've made (and a pond you can feed).",
+
+  // One sentence about you for search results and link previews
+  description:
+    "Ky Hoang is a Data Science student at UC Berkeley who builds software that helps people, and is looking for software engineering internships.",
 
   // Shown as an Email link at the top of the home page and in the footer.
   // Leave as "" to hide it.

@@ -10,13 +10,11 @@
 
   Light mode shows koi, dark mode shows fireflies. Double-click (or
   double-tap) an empty spot to drop a treat. A single click touches the
-  water, and any creature close by darts away. Lily pads float at the
-  sides (see scenery.ts).
+  water, and any creature close by darts away.
 */
 
 import { createCreature, mouthOf, startle, stepCreature, type Creature, type Kind, type World } from "./creatures";
-import { drawFirefly, drawKoi, drawLilyPad, drawRipple, drawTreat } from "./draw";
-import { placePads, type Pad } from "./scenery";
+import { drawFirefly, drawKoi, drawRipple, drawTreat } from "./draw";
 
 const TREAT_BITES = 5; // bites before a treat is gone
 const TREAT_LASTS = 20_000; // ms before an uneaten treat disappears
@@ -65,7 +63,6 @@ export function startPond(canvas: HTMLCanvasElement): void {
 
   const creatures: Creature[] = [];
   const ripples: Ripple[] = [];
-  let pads: Pad[] = [];
 
   let kind = kindForTheme(); // which skin is showing
   let fade = 1; // 0 = invisible, 1 = fully shown
@@ -108,8 +105,6 @@ export function startPond(canvas: HTMLCanvasElement): void {
     canvas.width = Math.round(world.width * sharpness);
     canvas.height = Math.round(world.height * sharpness);
     ctx!.setTransform(sharpness, 0, 0, sharpness, 0, 0);
-
-    pads = placePads(world.width, world.height);
 
     const wanted = Math.min(MAX_CREATURES, Math.round(world.height * perPixel));
     if (creatures.length === 0) {
@@ -201,18 +196,8 @@ export function startPond(canvas: HTMLCanvasElement): void {
     drawnTop = top;
     drawnBottom = bottom;
 
-    const drawPads = () => {
-      for (const pad of pads) {
-        if (inStrip(pad.y)) drawLilyPad(ctx!, pad, kind, now, fade);
-      }
-    };
-
-    // Fireflies fly over the lily pads, and their glows add their light
-    // together where they overlap. Koi swim under the pads, drawn last.
-    if (kind === "firefly") {
-      drawPads();
-      ctx!.globalCompositeOperation = "lighter";
-    }
+    // Glows add their light together where they overlap
+    ctx!.globalCompositeOperation = kind === "firefly" ? "lighter" : "source-over";
 
     for (const ripple of ripples) {
       if (!inStrip(ripple.y)) continue;
@@ -227,7 +212,6 @@ export function startPond(canvas: HTMLCanvasElement): void {
       else drawFirefly(ctx!, creature, fade);
     }
 
-    if (kind === "koi") drawPads();
     ctx!.globalCompositeOperation = "source-over";
     ctx!.globalAlpha = 1;
   }

@@ -18,7 +18,7 @@ interface Props {
   description?: string;
 }
 
-const { title, description = site.intro } = Astro.props;
+const { title, description = site.description } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.name;
 
 // The picture shown when a link to the site is pasted into a chat or a post: public/og.png
@@ -40,7 +40,7 @@ const previewImage = new URL("/og.png", Astro.site);
     <meta property="og:image" content={previewImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${site.name}: a photo, koi and lily pads`} />
+    <meta property="og:image:alt" content={`${site.name}: a photo and koi`} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 

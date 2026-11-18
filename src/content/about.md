@@ -1,8 +1,10 @@
-I'm a Data Science student at UC Berkeley, graduating in May 2028. I like building things end to end: a backend that does the real work, an interface people can use, and tests that keep it honest.
+I'm a Data Science student at UC Berkeley, graduating in May 2028. I grew up in Aarhus, Denmark, and have called the Bay Area home since I was 13.
 
-Most of my projects are in Python, with FastAPI on the server and React in the browser. I have also built a native macOS app in Swift and a procedurally generated game in Java.
+What I love most about software is building things that actually help people, especially alongside driven teammates. Lately, that's meant a lot of hackathons. I love the rush of a deadline and being on the same page with people who just want to get things done.
 
-I'm looking for software engineering internships.
+Most of my projects are in Python, with FastAPI on the server and React in the browser. I've also built a native macOS app in Swift and a procedurally generated game in Java.
+
+When I'm not building, I'm camping, backpacking or traveling. My favorite trip so far was Sequoia National Park, where I got to see the giant sequoias up close, then stayed on top of Moro Rock for the sunset and the stars. It's also where my profile picture was taken!
 
 ## Experience
 
