@@ -2,7 +2,7 @@
 
 Live at [ky-hoang.github.io](https://ky-hoang.github.io).
 
-A personal site built with [Astro](https://astro.build), plain CSS and TypeScript, with no other libraries. The home page opens with a photo, a short intro and links, then lists projects by year. Each project has its own page, and the background is a pond: koi in light mode, fireflies in dark mode.
+A personal site built with [Astro](https://astro.build), plain CSS and TypeScript, with no other libraries. The home page opens with a photo and a hello, a short intro and links, then lists projects by year. Each project has its own page, and the background is a pond: koi in light mode, fireflies in dark mode.
 
 ## The one rule
 
@@ -19,7 +19,7 @@ A personal site built with [Astro](https://astro.build), plain CSS and TypeScrip
 | Add, remove or edit a link | Edit one line in `src/content/site.ts`. Each link can name an `icon` |
 | Add a new icon | Add an entry to the list in `src/components/Icon.astro` |
 | Change your photo | Replace `src/content/profile.jpg` with a square photo. Delete the file to show no photo |
-| Change your name, intro or search description | `src/content/site.ts` |
+| Change your name, greeting, intro or search description | `src/content/site.ts` |
 | Edit the About page | `src/content/about.md` |
 | Add or swap your résumé | Save it as `public/resume.pdf`, and set `resume: "/resume.pdf"` in `src/content/site.ts` |
 | Change colors, fonts or widths | `src/styles/tokens.css` |
@@ -79,7 +79,7 @@ The background is one `<canvas>` behind the page, as tall as the page, that scro
 ```
 src/
 ├── content/              YOUR CONTENT
-│   ├── site.ts           name, intro, links, résumé
+│   ├── site.ts           name, greeting, intro, links, résumé
 │   ├── profile.jpg       your photo
 │   ├── about.md          About page text
 │   └── projects/         one folder per project

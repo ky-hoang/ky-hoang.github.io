@@ -4,7 +4,7 @@ What I love most about software is building things that actually help people, es
 
 Most of my projects are in Python, with FastAPI on the server and React in the browser. I've also built a native macOS app in Swift and a procedurally generated game in Java.
 
-When I'm not building, I'm camping, backpacking or traveling. My favorite trip so far was Sequoia National Park, where I got to see the giant sequoias up close, then stayed on top of Moro Rock for the sunset and the stars. It's also where my profile picture was taken!
+When I'm not building, I'm camping, backpacking or traveling. My favorite trip so far was Sequoia National Park, where I got to see the giant sequoias up close, then hiked up Moro Rock to catch the sunset and the stars. It's also where my profile picture was taken!
 
 ## Experience
 
