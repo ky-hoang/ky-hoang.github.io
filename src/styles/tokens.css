@@ -22,7 +22,13 @@
   /* Layout */
   --column: 40rem; /* width of the single centered column */
   --gutter: 1.5rem; /* space at the screen edges */
-  --radius: 8px;
+  --radius-sm: 6px; /* tags and small buttons */
+  --radius: 8px; /* rows, buttons, images */
+  --radius-lg: 12px; /* cards */
+
+  /* Motion: one curve for everything; quick for hover and press */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --fast: 150ms;
 
   /* Light mode: the pond by day */
   --bg: #f6f8f6;

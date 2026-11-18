@@ -66,9 +66,9 @@ const quickLinks = [
     grid-template-columns: 1fr;
     gap: 0.5rem 1rem;
     margin: 0 -0.75rem;
-    padding: 0.8rem 0.75rem;
+    padding: 0.75rem 0.75rem;
     border-radius: var(--radius);
-    transition: background-color 0.15s ease;
+    transition: background-color var(--fast) var(--ease);
   }
 
   .row.has-cover {
@@ -111,7 +111,7 @@ const quickLinks = [
 
   .text {
     display: grid;
-    gap: 0.2rem;
+    gap: 0.25rem;
     min-width: 0;
   }
 
@@ -133,7 +133,7 @@ const quickLinks = [
   }
 
   .stack {
-    margin-top: 0.15rem;
+    margin-top: 0.25rem;
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--muted);
@@ -152,21 +152,21 @@ const quickLinks = [
     z-index: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.45rem;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
   }
 
   .quick a {
-    padding: 0.1rem 0.55rem;
+    padding: 0.125rem 0.5rem;
     border: 1px solid var(--edge);
-    border-radius: 999px;
+    border-radius: var(--radius-sm);
     background: var(--bg);
     font-size: var(--text-xs);
     color: var(--text);
     text-decoration: none;
     transition:
-      border-color 0.15s ease,
-      color 0.15s ease;
+      border-color var(--fast) var(--ease),
+      color var(--fast) var(--ease);
   }
 
   .quick a:hover {
@@ -176,7 +176,7 @@ const quickLinks = [
 
   .draft {
     margin-left: 0.5rem;
-    padding: 0.1rem 0.4rem;
+    padding: 0.125rem 0.5rem;
     border: 1px solid var(--line);
     border-radius: 4px;
     font-family: var(--font-mono);
@@ -189,7 +189,7 @@ const quickLinks = [
   /* Phones: the thumbnail sits beside the title block */
   @media (max-width: 33.99rem) {
     .row.has-cover :global(img.thumb) {
-      margin-top: 0.35rem;
+      margin-top: 0.25rem;
     }
   }
 
@@ -207,7 +207,7 @@ const quickLinks = [
     .row.has-cover .type {
       grid-column: auto;
       align-self: start;
-      padding-top: 0.35rem;
+      padding-top: 0.25rem;
     }
   }
 
@@ -224,12 +224,12 @@ const quickLinks = [
       left: calc(100% + 2rem);
       width: 14rem;
       border-radius: var(--radius);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
       opacity: 0;
       transform: translateY(-50%) scale(0.97);
       transition:
-        opacity 0.18s ease,
-        transform 0.18s ease;
+        opacity var(--fast) var(--ease),
+        transform var(--fast) var(--ease);
       pointer-events: none;
     }
 
