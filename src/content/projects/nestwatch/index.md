@@ -5,12 +5,14 @@ type: hackathon
 summary: Maternal health monitoring that combines wearable data with pregnancy and medication context. Human Impact Track winner.
 stack: [Python, FastAPI, scikit-learn, pytest, React, TypeScript]
 cover: ./home.png
+coverAlt: Home screen of the NestWatch clinician portal
 links:
   code: https://github.com/ky-hoang/nestwatch
   demo: https://nestwatchproviderportal.lovable.app/
+  video: https://youtu.be/sArTKkmU7Lk
 ---
 
-Built with two teammates at the Innovation Intelligence Hackathon at UC Berkeley during SF Tech Week 2026, where it won the Human Impact Track. There is also a [demo video](https://youtu.be/sArTKkmU7Lk).
+Built with two teammates at the Innovation Intelligence Hackathon at UC Berkeley during SF Tech Week 2026, where it won the Human Impact Track.
 
 ## The problem
 

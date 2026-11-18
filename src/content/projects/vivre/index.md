@@ -7,9 +7,10 @@ stack: [Python, JavaScript, HTML/CSS, Meta Model API]
 links:
   code: https://github.com/ky-hoang/vivre
   demo: https://web-production-749fb.up.railway.app
+  video: https://drive.google.com/file/d/1mxDiw5nzRon1BF0P4Hc_xM5HBM5x6rz_/view?usp=sharing
 ---
 
-My solo submission to the Meta Global AI Developer Hackathon (Indie Developer track). There is a [demo video](https://drive.google.com/file/d/1mxDiw5nzRon1BF0P4Hc_xM5HBM5x6rz_/view?usp=sharing).
+My solo submission to the Meta Global AI Developer Hackathon (Indie Developer track).
 
 ## The problem
 

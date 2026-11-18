@@ -15,4 +15,4 @@ A full-stack retrieval-augmented generation (RAG) app. It indexes my Notion jour
 - **Hybrid search:** vector search and BM25 keyword search run side by side, and their results are merged with reciprocal-rank fusion
 - **Date filtering:** questions can be limited to a time range
 - **Multi-step queries:** the app rewrites follow-up questions so they stand on their own, retrieves relevant entries over several rounds, and computes exact counts for questions that ask for a number
-- **Regression checks:** automated checks run in GitHub Actions
+- **Regression checks:** run automatically in GitHub Actions

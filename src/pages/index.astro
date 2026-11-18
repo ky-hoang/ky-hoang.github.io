@@ -1,8 +1,9 @@
 ---
-/* Home page: your photo, a short intro and your links, then the project archive. */
+/* Home page: your photo, a short intro and your links, then your projects and experience. */
 import Base from "../layouts/Base.astro";
 import Avatar from "../components/Avatar.astro";
 import ContactLinks from "../components/ContactLinks.astro";
+import Experience from "../components/Experience.astro";
 import ProjectList from "../components/ProjectList.astro";
 import { getProjects } from "../lib/projects";
 import { site } from "../content/site";
@@ -27,9 +28,17 @@ const afterWave = rest.join("👋");
   </section>
 
   <ProjectList projects={projects} />
+
+  <div class="experience">
+    <Experience />
+  </div>
 </Base>
 
 <style>
+  .experience {
+    margin-top: 4rem;
+  }
+
   .hello {
     display: grid;
     justify-items: start;

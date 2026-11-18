@@ -19,11 +19,12 @@ A personal site built with [Astro](https://astro.build), plain CSS and TypeScrip
 | Add, remove or edit a link | Edit one line in `src/content/site.ts`. Each link can name an `icon` |
 | Add a new icon | Add an entry to the list in `src/components/Icon.astro` |
 | Change your photo | Replace `src/content/profile.jpg` with a square photo. Delete the file to show no photo |
-| Change your name, intro or search description | `src/content/site.ts` |
-| Edit the About page | `src/content/about.md` |
+| Change your name, tagline, intro or search description | `src/content/site.ts` |
+| Edit the About page | `src/content/about.md` for your story |
+| Add or edit a job, skill or award | `src/content/resume.ts`. Jobs show on the home page and the About page; keep them in step with your résumé |
 | Add or swap your résumé | Save it as `public/resume.pdf`, and set `resume: "/resume.pdf"` in `src/content/site.ts` |
 | Change colors, fonts or widths | `src/styles/tokens.css` |
-| Change the link preview picture | Replace `public/og.png` (1200 × 630 pixels). This is the card shown when the site's address is pasted into a chat or a post |
+| Change the link preview picture | Replace `public/og.jpg` (1200 × 630 pixels). This is the card shown when the site's address is pasted into a chat or a post. A project with a `cover` uses its cover instead |
 | Remove the pond | Delete `src/pond/`, the two Pond lines in `src/layouts/Base.astro`, and the "Psst" hint in `src/components/Footer.astro` |
 
 The folder name of a project becomes its address: `src/content/projects/my-project/` is served at `/projects/my-project/`.
@@ -39,8 +40,9 @@ The block at the top of each project's `index.md`:
 | `type` | Yes | One of `personal`, `class`, `hackathon`, `club` |
 | `summary` | Yes | One sentence, shown in the home page list |
 | `stack` | No | Tools used, e.g. `[Python, pandas]` |
-| `cover` | No | An image in the same folder, e.g. `./cover.png` |
-| `links` | No | `code:` and/or `demo:`, each a full web address |
+| `cover` | No | An image in the same folder, e.g. `./cover.png`. Also used as the project's link preview |
+| `coverAlt` | No | What the cover shows, in a few words, for people using screen readers |
+| `links` | No | `code:`, `demo:` and/or `video:`, each a full web address. They show as buttons on the home page and the project page |
 | `draft` | No | `true` hides it from the live site |
 
 If a required field is missing, a field name is misspelled, or a value is not allowed, the build stops and names the file and the field. The live site stays on the last version that built.
@@ -81,12 +83,13 @@ src/
 ├── content/              YOUR CONTENT
 │   ├── site.ts           name, intro, links, résumé
 │   ├── profile.jpg       your photo
-│   ├── about.md          About page text
+│   ├── about.md          About page story
+│   ├── resume.ts         experience, skills, awards
 │   └── projects/         one folder per project
 ├── content.config.ts     the fields every project must have
 ├── pages/                one file per page (home, about, project, 404)
 ├── layouts/Base.astro    the frame every page shares: <head>, header, footer, pond
-├── components/           header, footer, theme toggle, photo, links and icons, project list
+├── components/           header, footer, theme toggle, photo, links and icons, projects, experience
 ├── lib/projects.ts       loads and sorts the projects
 ├── pond/                 the background
 │   ├── Pond.astro        the canvas element and its placement
@@ -94,7 +97,7 @@ src/
 │   ├── creatures.ts      how creatures move
 │   └── draw.ts           how everything looks
 └── styles/               tokens.css (colors, fonts, widths) and global.css
-public/                   files served as they are: résumé, favicon, link preview picture
+public/                   files served as they are: résumé, favicon, link preview picture (og.jpg)
 templates/project/        copy this to start a new project
 .github/workflows/        publishes the site on every push
 AGENTS.md                 notes for AI coding tools working in this repository

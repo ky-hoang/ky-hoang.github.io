@@ -8,7 +8,7 @@ stack: [Java, Git]
 
 ## What I built
 
-Co-developed with a partner: a Java exploration game with seeded procedural world generation. The same seed always produces the same world of randomized rooms and hallways.
+A class project I built with a partner: a Java exploration game where every world is generated from a seed. The same seed always gives you the same rooms and hallways.
 
 ## How it works
 

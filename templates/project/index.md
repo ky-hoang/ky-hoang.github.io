@@ -10,9 +10,11 @@ summary: One sentence on what it does. # shown in the home page list
 # Everything below is optional. Delete any line you do not need.
 stack: [Python, pandas]
 # cover: ./cover.png # an image saved in this folder; remove the first # to use it
+# coverAlt: What the cover shows, in a few words # for screen readers
 links:
   code: https://github.com/you/project
   demo: https://example.com
+  # video: https://youtu.be/... # a demo video, if you have one
 draft: true # true = hidden from the live site. Change to false when ready
 ---
 

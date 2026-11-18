@@ -29,6 +29,7 @@
   --text: #1b2120;
   --muted: #5f6966;
   --line: #dde4e1;
+  --edge: #c2ccc8; /* outlines of buttons, a little stronger than --line */
   --hover: rgba(23, 117, 108, 0.07);
   --accent: #17756c;
   color-scheme: light;
@@ -40,6 +41,7 @@
   --text: #e7e9e4;
   --muted: #98a09b;
   --line: #232b2d;
+  --edge: #3a4648;
   --hover: rgba(240, 185, 85, 0.08);
   --accent: #f0b955;
   color-scheme: dark;

@@ -12,9 +12,7 @@ import ContactLinks from "./ContactLinks.astro";
     <figcaption>Conan O’Brien</figcaption>
   </figure>
   <ContactLinks />
-  <p class="hint" aria-hidden="true">
-    Psst, double-<span class="mouse">click</span><span class="touch">tap</span> the pond.
-  </p>
+  <p class="hint" aria-hidden="true">Psst, double-click (or tap) the pond.</p>
 </footer>
 
 <style>
@@ -57,21 +55,6 @@ import ContactLinks from "./ContactLinks.astro";
 
   .hint {
     font-size: var(--text-xs);
-  }
-
-  /* "double-click" with a mouse, "double-tap" on a touch screen */
-  .touch {
-    display: none;
-  }
-
-  @media (hover: none) {
-    .mouse {
-      display: none;
-    }
-
-    .touch {
-      display: inline;
-    }
   }
 
   /* The pond holds still for visitors who ask for less motion, so skip the hint */

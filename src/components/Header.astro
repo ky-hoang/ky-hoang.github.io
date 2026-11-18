@@ -1,5 +1,5 @@
 ---
-/* Top bar: your name on the left, About and the light/dark toggle on the right. */
+/* Top bar: your name on the left; About, Résumé and the light/dark toggle on the right. */
 import ThemeToggle from "./ThemeToggle.astro";
 import { site } from "../content/site";
 
@@ -10,6 +10,7 @@ const onAbout = Astro.url.pathname.startsWith("/about");
   <a class="name" href="/">{site.name}</a>
   <nav class="nav" aria-label="Main">
     <a href="/about/" aria-current={onAbout ? "page" : undefined}>About</a>
+    {site.resume && <a class="resume" href={site.resume}>Résumé</a>}
     <ThemeToggle />
   </nav>
 </header>
@@ -29,7 +30,7 @@ const onAbout = Astro.url.pathname.startsWith("/about");
     display: inline-flex;
     align-items: center;
     height: 2.25rem;
-    border: 1px solid var(--line);
+    border: 1px solid var(--edge);
     border-radius: 999px;
     background: var(--bg);
     text-decoration: none;
@@ -72,6 +73,13 @@ const onAbout = Astro.url.pathname.startsWith("/about");
   .nav a[aria-current="page"] {
     background: var(--hover);
     color: var(--text);
+  }
+
+  /* Very narrow phones: the Résumé button is already under your intro and in the footer */
+  @media (max-width: 23rem) {
+    .resume {
+      display: none !important;
+    }
   }
 
   @media (min-width: 40rem) {

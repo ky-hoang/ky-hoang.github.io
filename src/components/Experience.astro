@@ -1,0 +1,91 @@
+---
+/*
+  Your jobs, from src/content/resume.ts: role and place on the left, dates
+  on the right, and one line on what you did. Used on the home page and
+  the About page.
+*/
+import { experience } from "../content/resume";
+
+interface Props {
+  /** The heading's level, so it fits the page it sits on */
+  headingLevel?: 2 | 3;
+}
+
+const { headingLevel = 2 } = Astro.props;
+const Heading = `h${headingLevel}` as "h2" | "h3";
+---
+
+<section class="experience" aria-labelledby="experience-heading">
+  <Heading id="experience-heading" class="label">Experience</Heading>
+  <ul role="list">
+    {
+      experience.map((job) => (
+        <li class="job">
+          <p class="role">
+            {job.role}{" "}
+            <span class="org">· {job.org}</span>
+          </p>
+          <p class="dates">
+            {job.start} – {job.end || "now"}
+          </p>
+          <p class="note">{job.note}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .label {
+    margin-bottom: 0.75rem;
+  }
+
+  ul {
+    border-top: 1px solid var(--line);
+  }
+
+  .job {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .role {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .org {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .dates {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--muted);
+    white-space: nowrap;
+    padding-top: 0.3rem;
+  }
+
+  .note {
+    grid-column: 1 / -1;
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+
+  /* Phones: the dates go under the role */
+  @media (max-width: 30rem) {
+    .job {
+      grid-template-columns: 1fr;
+    }
+
+    .dates {
+      padding-top: 0;
+    }
+  }
+</style>

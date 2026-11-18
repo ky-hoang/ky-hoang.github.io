@@ -71,6 +71,29 @@ img {
   height: auto;
 }
 
+/* "Skip to content": hidden until reached with the Tab key */
+.skip {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 10;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+main:focus {
+  outline: none;
+}
+
 /* The page sits above the pond canvas */
 .page {
   position: relative;

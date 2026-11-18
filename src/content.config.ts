@@ -24,10 +24,12 @@ const projects = defineCollection({
       // Optional
       stack: z.array(z.string()).default([]),
       cover: image().optional(), // e.g. ./cover.png, a file in the same folder
+      coverAlt: z.string().optional(), // what the cover shows, for screen readers
       links: z
         .strictObject({
           code: z.url().optional(),
           demo: z.url().optional(),
+          video: z.url().optional(),
         })
         .default({}),
       draft: z.boolean().default(false), // true hides it from the live site

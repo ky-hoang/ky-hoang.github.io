@@ -12,6 +12,9 @@ export const site = {
   // Shown in the top-left corner and in the browser tab
   name: "Ky Hoang",
 
+  // A few words after your name in the home page's browser tab and link previews
+  tagline: "Data Science at UC Berkeley",
+
   // A few sentences at the top of the home page. A 👋 in it waves once
   // when the page opens.
   intro:

@@ -11,18 +11,31 @@ import Footer from "../components/Footer.astro";
 import Pond from "../pond/Pond.astro";
 import { site } from "../content/site";
 
+const FONT_URL =
+  "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&display=swap";
+
 interface Props {
   /** Page name for the browser tab. Leave out on the home page. */
   title?: string;
   /** One sentence for search results and link previews. */
   description?: string;
+  /** Picture for link previews (1200 × 630). Leave out to use public/og.jpg. */
+  image?: { src: string; alt: string };
+  /** "article" for a project page, "website" for everything else */
+  kind?: "website" | "article";
+  /** Keep this page out of search results (the 404 page) */
+  hidden?: boolean;
 }
 
-const { title, description = site.description } = Astro.props;
-const pageTitle = title ? `${title} · ${site.name}` : site.name;
+const { title, description = site.description, image, kind = "website", hidden = false } = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`;
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
 
-// The picture shown when a link to the site is pasted into a chat or a post: public/og.png
-const previewImage = new URL("/og.png", Astro.site);
+// The picture shown when a link to the site is pasted into a chat or a post
+const preview = {
+  src: new URL(image?.src ?? "/og.jpg", Astro.site),
+  alt: image?.alt ?? `${site.name}: a photo and koi`,
+};
 ---
 
 <!doctype html>
@@ -34,23 +47,26 @@ const previewImage = new URL("/og.png", Astro.site);
     <meta name="description" content={description} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <link rel="canonical" href={pageUrl} />
+    {hidden && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content={kind} />
     <meta property="og:site_name" content={site.name} />
-    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
-    <meta property="og:image" content={previewImage} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={preview.src} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${site.name}: a photo and koi`} />
+    <meta property="og:image:alt" content={preview.alt} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Heading font. If it fails to load, a built-in serif is used instead. -->
+    <!--
+      Heading font. It loads without holding up the page: text shows at once
+      in a built-in serif and switches when the font arrives.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&display=swap"
-    />
+    <link rel="stylesheet" href={FONT_URL} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={FONT_URL} /></noscript>
 
     <!--
       Page changes swap only the content, so the pond and the header stay
@@ -88,9 +104,11 @@ const previewImage = new URL("/og.png", Astro.site);
     <!-- To remove the background: delete this line, the Pond import above, and the src/pond folder -->
     <Pond />
 
+    <a class="skip" href="#content">Skip to content</a>
+
     <div class="page">
       <Header />
-      <main transition:animate="fade">
+      <main id="content" tabindex="-1" transition:animate="fade">
         <slot />
       </main>
       <Footer />

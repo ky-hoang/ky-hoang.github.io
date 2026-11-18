@@ -8,7 +8,7 @@ stack: [Swift, SwiftUI, Apple Vision]
 
 ## What I built
 
-A native macOS app that uses Apple Vision to extract editable text from screenshots and images.
+A Mac app for the moment you need text that's stuck in a screenshot. It uses Apple Vision to turn the image into text you can edit.
 
 ## How it works
 
@@ -17,4 +17,4 @@ A native macOS app that uses Apple Vision to extract editable text from screensh
 - **Export:** copy the result to the clipboard
 - **History:** past recognitions are stored locally
 
-I tested recognition and history across varied images, and the app handles recognition failures with explicit errors.
+I tested recognition and history on a wide range of images. When the app can't read an image, it says so with a clear error instead of failing silently.
